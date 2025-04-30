@@ -1,15 +1,20 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import ChatRooms from "./pages/ChatRooms";
-import ChatRoom from "./pages/ChatRoom";
+import ChatRooms from "./pages/chat/ChatRooms";
+import ChatRoom from "./pages/chat/ChatRoom";
+import Orders from "./pages/orders/Orders";
+import Home from "./pages/home/Home";
+import SearchResult from "./pages/home/SearchResult";
 
 function App() {
   return (
     <>
-      <div className="text-center text-lg font-bold p-4">박창섭의 애제자들 화이팅~!</div>
       <Routes>
         <Route path="/ChatRooms" element={<ChatRooms />} />
         <Route path="/ChatRoom" element={<ChatRoom />} />
+        <Route path="/Orders" element={<Orders />} />
+        <Route path="/Home" element={<Home />} />
+        <Route path="/SearchResult" element={<SearchResult />} />
       </Routes>
     </>
   );

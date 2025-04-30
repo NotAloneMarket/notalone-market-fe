@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { FaChevronLeft, FaArrowUp } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function ChatRoom() {
   const navigate = useNavigate();
@@ -10,17 +10,21 @@ export default function ChatRoom() {
   const [isDealEnded, setIsDealEnded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, sender: '무지한 무지', text: '안녕하세요' },
-    { id: 2, sender: '이상한 나라의 단무지', text: '블라블라블라블라블라' },
-    { id: 3, sender: isOwner ? '나' : '내가 바로 주최자', text: '두 분 더 들어오면 거래 시작할게요' },
-    { id: 4, sender: 'me', text: '안녕하세요' },
+    { id: 1, sender: "무지한 무지", text: "안녕하세요" },
+    { id: 2, sender: "이상한 나라의 단무지", text: "블라블라블라블라블라" },
+    {
+      id: 3,
+      sender: isOwner ? "나" : "내가 바로 주최자",
+      text: "두 분 더 들어오면 거래 시작할게요",
+    },
+    { id: 4, sender: "me", text: "안녕하세요" },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
   const handleSend = () => {
     if (!input.trim()) return;
-    setMessages([...messages, { id: Date.now(), sender: 'me', text: input }]);
-    setInput('');
+    setMessages([...messages, { id: Date.now(), sender: "me", text: input }]);
+    setInput("");
   };
 
   const handleDealEnd = () => {
@@ -33,10 +37,15 @@ export default function ChatRoom() {
       {/* 헤더 */}
       <div className="flex justify-between items-center px-4 py-3 border-b">
         <div className="flex items-center">
-          <FaChevronLeft className="text-gray-700 mr-2" onClick={() => navigate('/ChatRooms')} />
+          <FaChevronLeft
+            className="text-gray-700 mr-2"
+            onClick={() => navigate("/ChatRooms")}
+          />
           <div>
             <div className="font-bold">제주 감귤 10kg</div>
-            <div className="text-xs text-gray-500">2명 / 3명 {isOwner ? '개설자' : '참여자'}</div>
+            <div className="text-xs text-gray-500">
+              2명 / 3명 {isOwner ? "개설자" : "참여자"}
+            </div>
           </div>
         </div>
         {isOwner && (
@@ -44,10 +53,12 @@ export default function ChatRoom() {
             onClick={() => !isDealEnded && setShowModal(true)}
             disabled={isDealEnded}
             className={`text-sm font-medium px-3 py-1 rounded ${
-              isDealEnded ? 'bg-gray-300 text-gray-500' : 'bg-blue-500 text-white'
+              isDealEnded
+                ? "bg-gray-300 text-gray-500"
+                : "bg-blue-500 text-white"
             }`}
           >
-            {isDealEnded ? '거래 종료' : '거래 완료하기'}
+            {isDealEnded ? "거래 종료" : "거래 완료하기"}
           </button>
         )}
       </div>
@@ -55,13 +66,20 @@ export default function ChatRoom() {
       {/* 메시지 목록 */}
       <div className="flex-1 px-4 py-2 space-y-4 overflow-y-auto">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex flex-col ${msg.sender === 'me' ? 'items-end' : 'items-start'}`}>
-            {msg.sender !== 'me' && <div className="text-xs text-gray-500 mb-1">{msg.sender}</div>}
+          <div
+            key={msg.id}
+            className={`flex flex-col ${
+              msg.sender === "me" ? "items-end" : "items-start"
+            }`}
+          >
+            {msg.sender !== "me" && (
+              <div className="text-xs text-gray-500 mb-1">{msg.sender}</div>
+            )}
             <div
               className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${
-                msg.sender === 'me'
-                  ? 'bg-blue-500 text-white rounded-br-none'
-                  : 'bg-gray-100 text-black rounded-bl-none'
+                msg.sender === "me"
+                  ? "bg-blue-500 text-white rounded-br-none"
+                  : "bg-gray-100 text-black rounded-bl-none"
               }`}
             >
               {msg.text}
@@ -86,7 +104,7 @@ export default function ChatRoom() {
             className="flex-1 px-4 py-2 text-sm border rounded-full bg-gray-100 focus:outline-none"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
           />
           <button
             className="ml-2 p-2 bg-blue-500 rounded-full text-white"
