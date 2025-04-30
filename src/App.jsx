@@ -5,6 +5,7 @@ import ChatRoom from "./pages/chat/ChatRoom";
 import Orders from "./pages/orders/Orders";
 import Home from "./pages/home/Home";
 import SearchResult from "./pages/home/SearchResult";
+import ProductUploadPage from "./pages/regist/ProductUpload";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/Orders" element={<Orders />} />
         <Route path="/Home" element={<Home />} />
         <Route path="/SearchResult" element={<SearchResult />} />
+        <Route path="/upload" element={<ProductUploadPage />} />
       </Routes>
     </>
   );
