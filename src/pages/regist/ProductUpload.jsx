@@ -171,7 +171,7 @@ function ProductUploadPage() {
       {/* 업로드 버튼 */}
       <button
         onClick={handleUpload}
-        className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition"
+        className="w-full py-3 bg-[#4D7ADB] text-white font-semibold rounded-xl hover:bg-[#3B6AD4] transition"
       >
         업로드 하기
       </button>
