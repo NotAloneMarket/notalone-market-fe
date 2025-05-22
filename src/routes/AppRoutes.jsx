@@ -1,7 +1,6 @@
 // src/routes/AppRoutes.jsx
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "@/pages/MainLayout";
-
 import ChatRooms from "@/pages/chat/ChatRooms";
 import ChatRoom from "@/pages/chat/ChatRoom";
 import Orders from "@/pages/orders/Orders";
