@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 const chatRooms = [
   {
@@ -27,58 +28,98 @@ export default function ChatRooms() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="flex items-center p-4 border-b">
-        <FaChevronLeft className="mr-2 text-gray-700"  onClick={() => navigate('/')}/>
-        <span className="text-lg font-medium">채팅방</span>
-      </div>
+    <Wrapper>
+      <Header>
+        <Title>채팅방</Title>
+      </Header>
 
-      {/* 채팅방 리스트 */}
-      <div className="divide-y">
+      <RoomList>
         {chatRooms.map((room) => (
-          <div key={room.id} className="flex items-center p-4" onClick={() => navigate('/ChatRoom')} >
-            {/* 프로필 이미지 */}
-            <div className="w-12 h-12 rounded-full bg-gray-200 mr-4" />
-
-            {/* 채팅 정보 */}
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-sm">{room.title}</span>
-                <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    room.status === '진행중'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-300 text-black'
-                  }`}
-                >
-                  {room.status}
-                </span>
-              </div>
-              <div className="text-sm text-gray-500 mt-1">{room.message}</div>
-            </div>
-          </div>
+          <RoomItem key={room.id} onClick={() => navigate('/ChatRoom')}>
+            <Profile />
+            <RoomInfo>
+              <RoomTop>
+                <RoomTitle>{room.title}</RoomTitle>
+                <RoomStatus status={room.status}>{room.status}</RoomStatus>
+              </RoomTop>
+              <RoomMessage>{room.message}</RoomMessage>
+            </RoomInfo>
+          </RoomItem>
         ))}
-      </div>
-
-      {/* 하단 탭바 */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-white flex justify-around items-center h-16">
-        <div className="flex flex-col items-center text-black">
-          <svg className="w-6 h-6 mb-1 fill-current" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-          <span className="text-xs">Home</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-400">
-          <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <span className="text-xs">Chat</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-400">
-          <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-          <span className="text-xs">Orders</span>
-        </div>
-        <div className="flex flex-col items-center text-gray-400">
-          <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5.121 17.804A9.004 9.004 0 0112 15a9.004 9.004 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span className="text-xs">Mypage</span>
-        </div>
-      </div>
-    </div>
+      </RoomList>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  min-height: 100vh;
+  background-color: white;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  svg {
+    margin-right: 0.5rem;
+    color: #374151;
+    cursor: pointer;
+  }
+`;
+
+const Title = styled.span`
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-left: 2.7rem;
+  margin-top: -0.3rem;
+`;
+
+const RoomList = styled.div`
+`;
+
+const RoomItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+const Profile = styled.div`
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background-color: #e5e7eb;
+  margin-right: 1rem;
+`;
+
+const RoomInfo = styled.div`
+  flex: 1;
+`;
+
+const RoomTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const RoomTitle = styled.span`
+  font-weight: bold;
+  font-size: 0.875rem;
+`;
+
+const RoomStatus = styled.span`
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: ${(props) =>
+    props.status === '진행중' ? '#3B82F6' : '#D1D5DB'};
+  color: ${(props) =>
+    props.status === '진행중' ? 'white' : 'black'};
+`;
+
+const RoomMessage = styled.div`
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+`;
