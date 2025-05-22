@@ -20,6 +20,7 @@ export default function AppRoutes() {
       <Route path="/Login" element={<Login />} />
       <Route path="/Join" element={<Join />} />
       <Route path="/" element={<OnBoarding />} />
+      <Route path="/ChatRoom" element={<ChatRoom />} />
 
       {/* 공통 레이아웃이 적용되는 페이지 */}
       <Route
@@ -43,14 +44,6 @@ export default function AppRoutes() {
         element={
           <MainLayout>
             <ChatRooms />
-          </MainLayout>
-        }
-      />
-      <Route
-        path="/ChatRoom"
-        element={
-          <MainLayout>
-            <ChatRoom />
           </MainLayout>
         }
       />
