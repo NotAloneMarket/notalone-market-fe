@@ -76,8 +76,7 @@ export default function Home() {
             </S.ProductInfo>
           </S.ProductItem>
         ))}
-      </div>
-     </S.ProductList>
+      </S.ProductList>
       {/* 글쓰기 버튼 */}
       <S.FloatingButton onClick={() => navigate("/group-purchase/create")}>
         <FaPen />
