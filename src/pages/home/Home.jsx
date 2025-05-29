@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaChevronLeft, FaSearch, FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import "./Home.css";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -108,8 +109,8 @@ export default function Home() {
 
       {/* 플로팅 작성 버튼 */}
       <button
-        className="fixed bottom-20 right-4 w-12 h-12 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center"
-        onClick={() => navigate("/write")}
+        className="floating-button"
+        onClick={() => navigate("/group-purchase/create")}
       >
         <FaPen />
       </button>
