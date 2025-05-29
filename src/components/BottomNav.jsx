@@ -2,6 +2,7 @@
 import React from "react";
 import { FaHome, FaCommentDots, FaClipboardList, FaUser } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import styled from "styled-components";
 
 export default function BottomNav() {
   const navigate = useNavigate();
@@ -15,51 +16,60 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 56,
-        backgroundColor: "#fff",
-        borderTop: "1px solid #eee",
-        zIndex: 100,
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 390,
-          display: "flex",
-          justifyContent: "space-around",
-          alignItems: "center",
-        }}
-      >
+    <NavWrapper>
+      <NavInner>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <div
+            <NavItem
               key={item.label}
+              $active={isActive}
               onClick={() => navigate(item.path)}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                color: isActive ? "#5a6ef5" : "#999",
-                fontSize: 11,
-                cursor: "pointer",
-                fontWeight: isActive ? "bold" : "normal",
-              }}
             >
               {item.icon}
-              <span style={{ marginTop: 4 }}>{item.label}</span>
-            </div>
+              <span>{item.label}</span>
+            </NavItem>
           );
         })}
-      </div>
-    </nav>
+      </NavInner>
+    </NavWrapper>
   );
 }
+
+const NavWrapper = styled.nav`
+  position: fixed;
+  width: 390px;
+  max-width: 390px;
+  margin: 0 auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+`;
+
+const NavInner = styled.div`
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+`;
+
+const NavItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  cursor: pointer;
+  font-weight: ${({ $active }) => ($active ? "bold" : "normal")};
+  color: ${({ $active }) => ($active ? "#5a6ef5" : "#999")};
+
+  span {
+    margin-top: 4px;
+  }
+`;
