@@ -1,14 +1,18 @@
+import { useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import TopNav from "@/components/TopNav";
+import * as S from "./MainLayout.styles";
 
 export default function MainLayout({ children }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
   return (
-    <div className="w-screen min-h-screen flex justify-center bg-gray-100">
-      <div className="w-full max-w-[390px] h-full flex flex-col bg-white shadow-md">
-        <TopNav />
-        <main className="flex-grow overflow-y-auto">{children}</main>
+    <S.OuterWrapper>
+      <S.AppContainer>
+        <TopNav searchOpen={searchOpen} setSearchOpen={setSearchOpen} />
+        <S.MainContent $searchOpen={searchOpen}>{children}</S.MainContent>
         <BottomNav />
-      </div>
-    </div>
+      </S.AppContainer>
+    </S.OuterWrapper>
   );
 }
