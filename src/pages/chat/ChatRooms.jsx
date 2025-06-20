@@ -6,31 +6,74 @@ import axios from "../../api/axiosInstance";
 export default function ChatRooms() {
   const navigate = useNavigate();
   const [chatRooms, setChatRooms] = useState([]);
-  const userId = 1;
+  const [postMap, setPostMap] = useState({});
 
   useEffect(() => {
-    axios.get(`/chatrooms?userId=${userId}`).then(res => {
-      setChatRooms(res.data); // [{ id, title, status, lastMessage }]
-    });
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    console.log(token);
+    console.log(userId);
+
+    if (!token || !userId) return;
+
+    // 1. 채팅방 목록 불러오기
+    axios
+      .get(`/chatrooms?userId=${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(async res => {
+        const rooms = res.data;
+        setChatRooms(rooms);
+
+        // 2. postId들 추출해서 게시글 정보 요청
+        const postIds = rooms.map(r => r.postId);
+        if (postIds.length === 0) return;
+
+        const postsRes = await axios.get("/posts", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        console.log(postsRes.data);
+
+        // 3. postId 기준으로 post 객체를 Map 형태로 저장
+        const postMapData = {};
+        postsRes.data.forEach(post => {
+          if (postIds.includes(post.id)) {
+            postMapData[post.id] = post;
+          }
+        });
+
+        setPostMap(postMapData);
+      })
+      .catch(err => {
+        console.error("채팅방 또는 게시글 불러오기 실패", err);
+      });
   }, []);
 
   return (
     <Wrapper>
       <Header><Title>채팅방</Title></Header>
-
       <RoomList>
-        {chatRooms.map((room) => (
-          <RoomItem key={room.id} onClick={() => navigate(`/ChatRoom/${room.id}`)}>
-            <Profile />
-            <RoomInfo>
-              <RoomTop>
-                <RoomTitle>{room.title}</RoomTitle>
-                <RoomStatus status={room.status}>{room.status}</RoomStatus>
-              </RoomTop>
-              <RoomMessage>{room.lastMessage}</RoomMessage>
-            </RoomInfo>
-          </RoomItem>
-        ))}
+        {chatRooms.map((room) => {
+          const post = postMap[room.postId];
+          return (
+            <RoomItem key={room.id} onClick={() => navigate(`/ChatRoom/${room.id}`)}>
+              <Profile src={post?.imageUrl} />
+              <RoomInfo>
+                <RoomTop>
+                  <RoomTitle>{post?.title || "제목 없음"}</RoomTitle>
+                  <RoomStatus status={room.isCompleted === 'Y' ? "완료" : "진행중"}>
+                    {room.isCompleted === 'Y' ? "완료" : "진행중"}
+                  </RoomStatus>
+                </RoomTop>
+                <RoomMessage>{room.lastMessage || "메시지가 없습니다."}</RoomMessage>
+              </RoomInfo>
+            </RoomItem>
+          );
+        })}
       </RoomList>
     </Wrapper>
   );
@@ -49,12 +92,13 @@ const RoomItem = styled.div`
   border-bottom: 1px solid #e5e7eb;
 `;
 
-const Profile = styled.div`
+const Profile = styled.img`
   width: 3rem;
   height: 3rem;
   border-radius: 9999px;
   background-color: #e5e7eb;
   margin-right: 1rem;
+  object-fit: cover;
 `;
 
 const RoomInfo = styled.div` flex: 1; `;
