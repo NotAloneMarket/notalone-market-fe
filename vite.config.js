@@ -13,6 +13,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    global: 'window', // 🔥 핵심 해결 포인트
+  },
   server: {
     proxy: {
       "/user": {
@@ -23,6 +26,12 @@ export default defineConfig({
       "/uploads": {
         target: "http://localhost:8080",
         changeOrigin: true,
+      },
+      '/ws': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        ws: true,
       },
     },
   },
