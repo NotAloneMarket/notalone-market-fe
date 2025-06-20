@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaPhone, FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,9 +6,12 @@ import axios from "axios";
 const handleSubmit = async () => {
   try {
     const formData = new FormData();
-    formData.append("userId", 1); // 예시. 실제 로그인 유저 ID로 교체
+    formData.append("userId", 1); // 실제 로그인 사용자 ID
     formData.append("nickname", nickname);
     formData.append("phoneNum", phoneNum);
+    if (profileImage) {
+      formData.append("profileImage", profileImage);
+    }
 
     const token = localStorage.getItem("token");
 
@@ -23,11 +26,11 @@ const handleSubmit = async () => {
       }
     );
 
-    alert("프로필 수정 완료!");
+    alert("프로필이 수정되었습니다.");
     navigate("/mypage");
   } catch (err) {
     console.error(err);
-    alert("수정 실패!");
+    alert("수정 실패");
   }
 };
 
@@ -35,6 +38,33 @@ export default function EditProfile() {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState("닉넴");
   const [phoneNum, setPhoneNum] = useState("01012345678");
+  const [profileImage, setProfileImage] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get("http://localhost:8080/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const { nickname, phoneNum, profileImageUrl } = res.data;
+        setNickname(nickname);
+        setPhoneNum(phoneNum);
+        if (profileImageUrl) {
+          setPreviewUrl(`http://localhost:8080${profileImageUrl}`);
+        }
+      } catch (err) {
+        console.error("유저 정보 불러오기 실패", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   return (
     <div
@@ -81,7 +111,49 @@ export default function EditProfile() {
               alignItems: "center",
             }}
           >
-            <FaUserCircle size={60} color="#999" />
+            <label htmlFor="profileImageInput">
+              <div
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: "50%",
+                  backgroundColor: "#ddd",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                }}
+              >
+                {previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="미리보기"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <FaUserCircle size={60} color="#999" />
+                )}
+              </div>
+            </label>
+
+            <input
+              type="file"
+              id="profileImageInput"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setProfileImage(file);
+                  setPreviewUrl(URL.createObjectURL(file));
+                }
+              }}
+            />
           </div>
         </div>
         <div style={{ marginTop: 12, fontWeight: "bold", fontSize: 16 }}>

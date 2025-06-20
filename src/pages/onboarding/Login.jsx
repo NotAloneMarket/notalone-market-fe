@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
-import axios from "../../api/axiosInstance"; 
+import axios from "../../api/axiosInstance";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -54,7 +54,14 @@ export default function Login() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#5a6ef5", marginBottom: "8px" }}>
+          <h1
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              color: "#5a6ef5",
+              marginBottom: "8px",
+            }}
+          >
             나혼자 안산다
           </h1>
           <p style={{ fontSize: "13px", color: "#888" }}>
@@ -62,7 +69,14 @@ export default function Login() {
           </p>
         </div>
 
-        <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", marginBottom: "24px" }}>
+        <div
+          style={{
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: "16px",
+            marginBottom: "24px",
+          }}
+        >
           로그인
         </div>
 
@@ -121,7 +135,14 @@ export default function Login() {
         </div>
 
         {error && (
-          <div style={{ color: "red", fontSize: "13px", marginBottom: "16px", textAlign: "center" }}>
+          <div
+            style={{
+              color: "red",
+              fontSize: "13px",
+              marginBottom: "16px",
+              textAlign: "center",
+            }}
+          >
             {error}
           </div>
         )}

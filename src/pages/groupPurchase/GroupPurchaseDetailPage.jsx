@@ -1,15 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./GroupPurchaseDetailPage.css";
 import sampleImg from "../../assets/sample.png";
 import { FaChevronLeft } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "../../api/axiosInstance";
 
 export default function GroupPurchaseDetailPage() {
-  const totalAmount = 24000;
-  const totalQuantity = 18;
-  const availableQuantity = 16;
-  const unitPrice = Math.floor(totalAmount / totalQuantity);
+  const { id } = useParams();
   const navigate = useNavigate();
+
+  const [post, setPost] = useState(null);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8080/posts/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setPost(res.data);
+      } catch (err) {
+        console.error("상세 정보 불러오기 실패", err);
+      }
+    };
+
+    fetchPost();
+  }, [id]);
+
+  if (!post) return <div>불러오는 중...</div>;
+
+  const {
+    title,
+    description,
+    totalAmount,
+    totalQuantity,
+    myQuantity,
+    pricePerItem,
+    participantLimit,
+    categoryName,
+    imageUrl,
+  } = post;
+
+  const availableQuantity = totalQuantity - myQuantity;
 
   return (
     <div className="detail-page">
@@ -23,22 +56,27 @@ export default function GroupPurchaseDetailPage() {
       </div>
 
       {/* 상품 이미지 */}
-      <div className="image-container">
-        <img src={sampleImg} alt="단백질 쉐이크" className="product-image" />
-      </div>
+      <img
+        src={
+          imageUrl?.startsWith("/uploads/")
+            ? `http://localhost:8080${imageUrl}`
+            : imageUrl
+            ? import.meta.env.BASE_URL + imageUrl
+            : sampleImg
+        }
+        alt={title}
+        className="product-image"
+      />
 
       {/* 본문 정보 */}
       <div className="info-section">
-        <h1 className="title">단백질 쉐이크 18개입</h1>
+        <h1 className="title">{title}</h1>
         <div className="sub-info">
-          <span className="category">식품</span>
-          <span className="nickname">닉네임</span>
+          <span className="category">{categoryName}</span>
+          <span className="nickname">{post.nickname ?? "닉네임"}</span>
         </div>
 
-        <div className="description">
-          단백질 쉐이크 같이 사실 분 구합니다 <br />
-          채팅방 들어와주세요
-        </div>
+        <div className="description">{description}</div>
 
         <div className="detail-table">
           <div className="row">
@@ -60,17 +98,48 @@ export default function GroupPurchaseDetailPage() {
       <div className="bottom-bar">
         <div className="left-info">
           <div className="unit-price-label">1개 당 예상 금액</div>
-          <div className="unit-price">{unitPrice.toLocaleString()} 원</div>
+          <div className="unit-price">{pricePerItem.toLocaleString()} 원</div>
         </div>
-
         <div className="member-info">
-          <span className="dot" />
-          <span className="dot" />
-          <span className="dot empty" />
-          <span className="dot empty" />
+          {[...Array(participantLimit)].map((_, i) => (
+            <span key={i} className={`dot ${i < myQuantity ? "" : "empty"}`} />
+          ))}
         </div>
+        <button
+          className="chat-btn"
+          onClick={async () => {
+            try {
+              const userId = localStorage.getItem("userId");
+              if (!userId) {
+                alert("로그인이 필요합니다.");
+                return;
+              }
 
-        <button className="chat-btn">채팅방 참여</button>
+              const res = await axios.post(
+                "http://localhost:8080/chatrooms",
+                {
+                  postId: Number(id),
+                  hostId: Number(userId),
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                }
+              );
+
+              const newChatRoomId = res.data; // ← POST 응답에서 받은 chatRoomId
+              console.log("✅ ChatRoom 생성 응답:", res.data); // 여기에 id가 있는지 확인
+
+              navigate(`/ChatRoom/${newChatRoomId}`);
+            } catch (err) {
+              console.error("채팅방 생성 실패", err);
+              alert("채팅방 참여에 실패했습니다.");
+            }
+          }}
+        >
+          채팅방 참여
+        </button>
       </div>
     </div>
   );

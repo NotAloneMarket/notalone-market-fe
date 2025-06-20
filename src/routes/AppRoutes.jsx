@@ -1,4 +1,3 @@
-// src/routes/AppRoutes.jsx
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "@/pages/MainLayout";
 import ChatRooms from "@/pages/chat/ChatRooms";
@@ -12,7 +11,7 @@ import Join from "@/pages/onboarding/Join";
 import MyPage from "@/pages/mypage/MyPage";
 import EditProfile from "@/pages/mypage/EditProfile";
 import ProductUpload from "@/pages/groupPurchase/ProductUpload";
-import Detail from "@/pages/groupPurchase/GroupPurchaseDetailPage";
+import GroupPurchaseDetailPage from "@/pages/groupPurchase/GroupPurchaseDetailPage";
 
 export default function AppRoutes() {
   return (
@@ -21,8 +20,8 @@ export default function AppRoutes() {
       <Route path="/Login" element={<Login />} />
       <Route path="/Join" element={<Join />} />
       <Route path="/" element={<OnBoarding />} />
-      <Route path="/ChatRoom" element={<ChatRoom />} />
-      <Route path="/Detail" element={<Detail />} />
+      <Route path="/ChatRoom/:id" element={<ChatRoom />} />
+      <Route path="/Detail/:id" element={<GroupPurchaseDetailPage />} />
 
       {/* 공통 레이아웃이 적용되는 페이지 */}
       <Route
