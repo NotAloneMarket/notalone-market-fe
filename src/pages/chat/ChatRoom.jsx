@@ -1,50 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
-import axios from "../../api/axiosInstance"; // baseURL 설정된 axios
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+import axios from "../../api/axiosInstance";
 import styled, { css } from "styled-components";
 
 export default function ChatRoom() {
+  const { id: chatId } = useParams();
   const navigate = useNavigate();
-  const { chatId } = useParams(); // /ChatRoom/:chatId
-
   const [isOwner, setIsOwner] = useState(false);
   const [isDealEnded, setIsDealEnded] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const userId = 1; // 로그인 사용자 (임시로 하드코딩)
+  const [stompClient, setStompClient] = useState(null);
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    // 참여 정보 가져오기
-    axios.get(`/api/chat/${chatId}/status?userId=${userId}`).then(res => {
-      setIsOwner(res.data.isOwner);
-      setIsDealEnded(res.data.isDealEnded);
-    });
-
-    // 메시지 불러오기
-    axios.get(`/api/chat/${chatId}/messages`).then(res => {
+    axios.get(`/chatrooms/${chatId}/messages`).then(res => {
       setMessages(res.data);
     });
+
+    const socket = new SockJS("http://localhost:8080/ws");
+    const client = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/topic/chat/${chatId}`, message => {
+          const newMessage = JSON.parse(message.body);
+          setMessages(prev => [...prev, {
+            sender: newMessage.senderId == userId ? "me" : "상대",
+            text: newMessage.content
+          }]);
+        });
+      },
+    });
+
+    client.activate();
+    setStompClient(client);
+
+    return () => client.deactivate();
   }, [chatId]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !stompClient) return;
 
-    axios.post(`/api/chat/${chatId}/message`, {
-      senderId: userId,
+    const dto = {
+      chatId: Number(chatId),
+      senderId: Number(userId),
       content: input,
-    }).then(() => {
-      setMessages([...messages, { id: Date.now(), sender: "me", text: input }]);
-      setInput("");
-    });
-  };
+      messageType: "TALK"
+    };
 
-  const handleDealEnd = () => {
-    axios.post(`/api/chat/${chatId}/complete?userId=${userId}`).then(() => {
-      setIsDealEnded(true);
-      setShowModal(false);
-    });
+    stompClient.publish({ destination: "/app/chat/send", body: JSON.stringify(dto) });
+    setMessages(prev => [...prev, { sender: "me", text: input }]);
+    setInput("");
   };
 
   return (
@@ -58,27 +68,16 @@ export default function ChatRoom() {
               <SubTitle>{isOwner ? "개설자" : "참여자"}</SubTitle>
             </div>
           </HeaderLeft>
-          {isOwner && (
-            <EndButton
-              disabled={isDealEnded}
-              ended={isDealEnded}
-              onClick={() => !isDealEnded && setShowModal(true)}
-            >
-              {isDealEnded ? "거래 종료" : "거래 완료하기"}
-            </EndButton>
-          )}
         </Header>
 
         <MessagesArea>
-          {messages.map((msg) => (
-            <MessageContainer key={msg.id} isMe={msg.sender === "me"}>
+          {messages.map((msg, i) => (
+            <MessageContainer key={i} isMe={msg.sender === "me"}>
               {msg.sender !== "me" && <Sender>{msg.sender}</Sender>}
               <MessageBubble isMe={msg.sender === "me"}>{msg.text}</MessageBubble>
             </MessageContainer>
           ))}
         </MessagesArea>
-
-        {isDealEnded && <DealEndedText>거래가 종료된 채팅방입니다.</DealEndedText>}
 
         {!isDealEnded && (
           <InputBox>
@@ -89,30 +88,13 @@ export default function ChatRoom() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
-            <SendButton onClick={handleSend}>
-              <FaArrowUp size={16} />
-            </SendButton>
+            <SendButton onClick={handleSend}><FaArrowUp size={16} /></SendButton>
           </InputBox>
-        )}
-
-        {showModal && (
-          <ModalOverlay>
-            <ModalContent>
-              <ModalText>거래를 종료 하시겠습니까?</ModalText>
-              <ModalActions>
-                <ModalButton onClick={() => setShowModal(false)} gray>
-                  아니요
-                </ModalButton>
-                <ModalButton onClick={handleDealEnd}>예</ModalButton>
-              </ModalActions>
-            </ModalContent>
-          </ModalOverlay>
         )}
       </Wrapper>
     </LayoutWrapper>
   );
 }
-
 // ✅ styled-components (생략 없이 포함)
 const LayoutWrapper = styled.div`
   width: 100vw;
