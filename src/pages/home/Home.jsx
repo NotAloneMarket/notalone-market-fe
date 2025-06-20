@@ -84,7 +84,10 @@ export default function Home() {
 
       <S.ProductList>
         {productList.map((product) => (
-          <S.ProductItem key={product.id} onClick={() => navigate(`/Detail`)}>
+          <S.ProductItem
+            key={product.id}
+            onClick={() => navigate(`/Detail/${product.id}`)}
+          >
             <S.ProductImage src={product.image} alt="product" />
             <S.ProductInfo>
               <S.ProductTitle>{product.title}</S.ProductTitle>
