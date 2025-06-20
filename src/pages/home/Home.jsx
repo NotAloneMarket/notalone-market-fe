@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import "./Home.css";
 import sampleImg from "../../assets/sample.png";
 import * as S from "./Home.styles";
 
@@ -18,22 +17,20 @@ export default function Home() {
     "잡화",
   ];
 
-  // axios 또는 fetch로 교체
   const fetchProducts = async () => {
-    // 임시 데이터
-    const response = Array(10).fill({
-      id: crypto.randomUUID(), // key로 활용
+    const response = Array(10).fill().map(() => ({
+      id: crypto.randomUUID(),
       title: "단백질 쉐이크 18개입",
       price: "1,333 원",
       chatCount: 4,
       image: sampleImg,
-    });
+    }));
     setProductList(response);
   };
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory]); // 카테고리 변경 시 다시 불러오기
+  }, [selectedCategory]);
 
   const renderChatDots = (count) => {
     const dots = Array(Math.min(count, 3)).fill("●");
@@ -49,7 +46,6 @@ export default function Home() {
 
   return (
     <S.Container>
-      {/* 카테고리 */}
       <S.CategoryBar>
         {categories.map((cat) => (
           <S.CategoryButton
@@ -61,10 +57,13 @@ export default function Home() {
           </S.CategoryButton>
         ))}
       </S.CategoryBar>
-      {/* 상품 리스트 */}
+
       <S.ProductList>
         {productList.map((product) => (
-          <S.ProductItem key={product.id}>
+          <S.ProductItem
+            key={product.id}
+            onClick={() => navigate(`/Detail`)}
+          >
             <S.ProductImage src={product.image} alt="product" />
             <S.ProductInfo>
               <S.ProductTitle>{product.title}</S.ProductTitle>
@@ -77,10 +76,8 @@ export default function Home() {
           </S.ProductItem>
         ))}
       </S.ProductList>
-      {/* 글쓰기 버튼 */}
-      <S.FloatingButton onClick={() => navigate("/group-purchase/create")}>
-        <FaPen />
-      </S.FloatingButton>
+
+      <S.FloatingButton onClick={() => navigate("/ProductUpload")}> <FaPen /> </S.FloatingButton>
     </S.Container>
   );
 }

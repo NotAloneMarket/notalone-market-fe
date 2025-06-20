@@ -20,11 +20,6 @@ export default function GroupPurchaseDetailPage() {
           className="back-btn"
           onClick={() => navigate(-1)}
         />
-        <div className="menu-btn">
-          <span />
-          <span />
-          <span />
-        </div>
       </div>
 
       {/* 상품 이미지 */}
