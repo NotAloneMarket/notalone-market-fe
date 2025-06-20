@@ -72,7 +72,6 @@ export default function GroupPurchaseDetailPage() {
       <div className="info-section">
         <h1 className="title">{title}</h1>
         <div className="sub-info">
-          password
           <span className="category">{categoryName}</span>
           <span className="nickname">{post.nickname ?? "닉네임"}</span>
         </div>
