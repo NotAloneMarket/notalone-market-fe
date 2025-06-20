@@ -3,41 +3,10 @@ import { FaUserCircle, FaPhone, FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const handleSubmit = async () => {
-  try {
-    const formData = new FormData();
-    formData.append("userId", 1); // 실제 로그인 사용자 ID
-    formData.append("nickname", nickname);
-    formData.append("phoneNum", phoneNum);
-    if (profileImage) {
-      formData.append("profileImage", profileImage);
-    }
-
-    const token = localStorage.getItem("token");
-
-    const res = await axios.put(
-      "http://localhost:8080/user/profile",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    alert("프로필이 수정되었습니다.");
-    navigate("/mypage");
-  } catch (err) {
-    console.error(err);
-    alert("수정 실패");
-  }
-};
-
 export default function EditProfile() {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState("닉넴");
-  const [phoneNum, setPhoneNum] = useState("01012345678");
+  const [nickname, setNickname] = useState("");
+  const [phoneNum, setPhoneNum] = useState("");
   const [profileImage, setProfileImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -46,7 +15,7 @@ export default function EditProfile() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await axios.get("http://localhost:8080/user/me", {
+        const res = await axios.get("/user/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -56,15 +25,45 @@ export default function EditProfile() {
         setNickname(nickname);
         setPhoneNum(phoneNum);
         if (profileImageUrl) {
-          setPreviewUrl(`http://localhost:8080${profileImageUrl}`);
+          setPreviewUrl(profileImageUrl);
         }
       } catch (err) {
-        console.error("유저 정보 불러오기 실패", err);
+        console.error("유저 정보 불러오기 실패", err.message);
       }
     };
 
     fetchUserInfo();
   }, []);
+
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("nickname", nickname);
+      formData.append("phoneNum", phoneNum);
+      if (profileImage) {
+        formData.append("profileImage", profileImage);
+      }
+
+      const token = localStorage.getItem("token");
+
+      const res = await axios.put(
+        "/user/profile", // 프록시 경로
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("프로필이 수정되었습니다.");
+      navigate("/mypage");
+    } catch (err) {
+      console.error(err);
+      alert("수정 실패");
+    }
+  };
 
   return (
     <div
@@ -157,7 +156,7 @@ export default function EditProfile() {
           </div>
         </div>
         <div style={{ marginTop: 12, fontWeight: "bold", fontSize: 16 }}>
-          김동덕
+          {nickname}
         </div>
       </div>
 
