@@ -3,10 +3,11 @@ import { FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import sampleImg from "../../assets/sample.png";
 import * as S from "./Home.styles";
+import axios from "../../api/axiosInstance";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState("식품");
+  const [selectedCategory, setSelectedCategory] = useState("전체");
   const [productList, setProductList] = useState([]);
 
   const categories = [
@@ -18,14 +19,39 @@ export default function Home() {
   ];
 
   const fetchProducts = async () => {
-    const response = Array(10).fill().map(() => ({
-      id: crypto.randomUUID(),
-      title: "단백질 쉐이크 18개입",
-      price: "1,333 원",
-      chatCount: 4,
-      image: sampleImg,
-    }));
-    setProductList(response);
+    try {
+      const res = await axios.get("http://localhost:8080/posts", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      console.log("posts 응답 데이터:", res.data);
+
+      const data = res.data ?? [];
+
+      const filtered =
+        selectedCategory === "전체"
+          ? data
+          : data.filter((p) => p.categoryName === selectedCategory);
+
+      const transformed = filtered.map((item) => ({
+        id: item.id,
+        title: item.title,
+        price: item.totalQuantity
+          ? `${Math.floor(item.totalAmount / item.totalQuantity)} 원`
+          : "가격 정보 없음",
+        chatCount: 0,
+        image: item.imageUrl
+          ? `http://localhost:8080${item.imageUrl}`
+          : sampleImg,
+      }));
+
+      setProductList(transformed);
+    } catch (err) {
+      console.error("상품 목록 불러오기 실패", err);
+      setProductList([]);
+    }
   };
 
   useEffect(() => {
@@ -60,10 +86,7 @@ export default function Home() {
 
       <S.ProductList>
         {productList.map((product) => (
-          <S.ProductItem
-            key={product.id}
-            onClick={() => navigate(`/Detail`)}
-          >
+          <S.ProductItem key={product.id} onClick={() => navigate(`/Detail`)}>
             <S.ProductImage src={product.image} alt="product" />
             <S.ProductInfo>
               <S.ProductTitle>{product.title}</S.ProductTitle>
@@ -77,7 +100,9 @@ export default function Home() {
         ))}
       </S.ProductList>
 
-      <S.FloatingButton onClick={() => navigate("/ProductUpload")}> <FaPen /> </S.FloatingButton>
+      <S.FloatingButton onClick={() => navigate("/ProductUpload")}>
+        <FaPen />
+      </S.FloatingButton>
     </S.Container>
   );
 }
