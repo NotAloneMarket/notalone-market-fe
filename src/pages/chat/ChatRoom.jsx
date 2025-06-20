@@ -17,7 +17,7 @@ export default function ChatRoom() {
   const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    axios.get(`/chatrooms/${chatId}/messages`).then(res => {
+    axios.get(`/chatrooms/${chatId}/messages`).then((res) => {
       setMessages(res.data);
     });
 
@@ -26,12 +26,15 @@ export default function ChatRoom() {
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
       onConnect: () => {
-        client.subscribe(`/topic/chat/${chatId}`, message => {
+        client.subscribe(`/topic/chat/${chatId}`, (message) => {
           const newMessage = JSON.parse(message.body);
-          setMessages(prev => [...prev, {
-            sender: newMessage.senderId == userId ? "me" : "상대",
-            text: newMessage.content
-          }]);
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: newMessage.senderId == userId ? "me" : "상대",
+              text: newMessage.content,
+            },
+          ]);
         });
       },
     });
@@ -49,11 +52,14 @@ export default function ChatRoom() {
       chatId: Number(chatId),
       senderId: Number(userId),
       content: input,
-      messageType: "TALK"
+      messageType: "TALK",
     };
 
-    stompClient.publish({ destination: "/app/chat/send", body: JSON.stringify(dto) });
-    setMessages(prev => [...prev, { sender: "me", text: input }]);
+    stompClient.publish({
+      destination: "/app/chat/send",
+      body: JSON.stringify(dto),
+    });
+    setMessages((prev) => [...prev, { sender: "me", text: input }]);
     setInput("");
   };
 
@@ -74,7 +80,9 @@ export default function ChatRoom() {
           {messages.map((msg, i) => (
             <MessageContainer key={i} isMe={msg.sender === "me"}>
               {msg.sender !== "me" && <Sender>{msg.sender}</Sender>}
-              <MessageBubble isMe={msg.sender === "me"}>{msg.text}</MessageBubble>
+              <MessageBubble isMe={msg.sender === "me"}>
+                {msg.text}
+              </MessageBubble>
             </MessageContainer>
           ))}
         </MessagesArea>
@@ -88,7 +96,9 @@ export default function ChatRoom() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
             />
-            <SendButton onClick={handleSend}><FaArrowUp size={16} /></SendButton>
+            <SendButton onClick={handleSend}>
+              <FaArrowUp size={16} />
+            </SendButton>
           </InputBox>
         )}
       </Wrapper>
@@ -132,8 +142,13 @@ const HeaderLeft = styled.div`
   }
 `;
 
-const Title = styled.div` font-weight: bold; `;
-const SubTitle = styled.div` font-size: 12px; color: #6b7280; `;
+const Title = styled.div`
+  font-weight: bold;
+`;
+const SubTitle = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+`;
 
 const EndButton = styled.button`
   font-size: 14px;
@@ -161,7 +176,11 @@ const MessageContainer = styled.div`
   align-items: ${({ isMe }) => (isMe ? "flex-end" : "flex-start")};
 `;
 
-const Sender = styled.div` font-size: 12px; color: #6b7280; margin-bottom: 4px; `;
+const Sender = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+`;
 const MessageBubble = styled.div`
   max-width: 70%;
   padding: 8px 16px;
@@ -235,7 +254,10 @@ const ModalContent = styled.div`
   text-align: center;
 `;
 
-const ModalText = styled.p` margin-bottom: 16px; font-weight: 500; `;
+const ModalText = styled.p`
+  margin-bottom: 16px;
+  font-weight: 500;
+`;
 
 const ModalActions = styled.div`
   display: flex;
