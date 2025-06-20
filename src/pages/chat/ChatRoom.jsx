@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
 import SockJS from "sockjs-client";
@@ -11,46 +11,82 @@ export default function ChatRoom() {
   const navigate = useNavigate();
   const [isOwner, setIsOwner] = useState(false);
   const [isDealEnded, setIsDealEnded] = useState(false);
+  const [postTitle, setPostTitle] = useState("");
+  const [participantCount, setParticipantCount] = useState(0);
+  const [participantLimit, setParticipantLimit] = useState(0);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const [stompClient, setStompClient] = useState(null);
-  const userId = localStorage.getItem("userId");
 
-  useEffect(() => {
-    axios.get(`/chatrooms/${chatId}/messages`).then((res) => {
-      setMessages(res.data);
-    });
+  const userId = Number(localStorage.getItem("userId"));
+  const token = localStorage.getItem("token");
 
-    const socket = new SockJS("http://localhost:8080/ws");
-    const client = new Client({
-      webSocketFactory: () => socket,
-      reconnectDelay: 5000,
-      onConnect: () => {
-        client.subscribe(`/topic/chat/${chatId}`, (message) => {
-          const newMessage = JSON.parse(message.body);
-          setMessages((prev) => [
-            ...prev,
-            {
-              sender: newMessage.senderId == userId ? "me" : "상대",
-              text: newMessage.content,
-            },
-          ]);
-        });
-      },
-    });
+  // 초기 데이터 조회
+useEffect(() => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 
-    client.activate();
-    setStompClient(client);
+  // 메시지
+  axios.get(`/chatrooms/${chatId}/messages`, config).then((res) => {
+    const fetchedMessages = res.data.map((msg) => ({
+      senderId: msg.senderId,
+      sender: msg.sender,
+      text: msg.message,
+    }));
+    setMessages(fetchedMessages);
+  });
 
-    return () => client.deactivate();
-  }, [chatId]);
+  // 게시글 정보
+  axios.get(`/posts/from-chatroom/${chatId}`, config).then((res) => {
+    const post = res.data[0];
+    console.log("게시글 정보", post);
+    setPostTitle(post.title);
+    setParticipantLimit(post.participantLimit);
+    setIsOwner(post.writerId === userId);
+  });
+
+  // 참여자 수
+  axios.get(`/chatrooms/${chatId}/count`, config).then((res) => {
+    setParticipantCount(res.data.participantCount);
+  });
+
+  // WebSocket 연결
+  const socket = new SockJS("http://localhost:8080/ws");
+  const client = new Client({
+    webSocketFactory: () => socket,
+    reconnectDelay: 5000,
+    onConnect: () => {
+      client.subscribe(`/topic/chat/${chatId}`, (message) => {
+        const newMessage = JSON.parse(message.body);
+        setMessages((prev) => [
+          ...prev,
+          {
+            senderId: newMessage.senderId,
+            sender: newMessage.sender,
+            text: newMessage.content,
+          },
+        ]);
+      });
+    },
+  });
+
+  client.activate();
+  setStompClient(client);
+
+  return () => client.deactivate();
+}, [chatId, token, userId]);
+s
 
   const handleSend = () => {
     if (!input.trim() || !stompClient) return;
 
     const dto = {
       chatId: Number(chatId),
-      senderId: Number(userId),
+      senderId: userId,
       content: input,
       messageType: "TALK",
     };
@@ -59,35 +95,57 @@ export default function ChatRoom() {
       destination: "/app/chat/send",
       body: JSON.stringify(dto),
     });
-    setMessages((prev) => [...prev, { sender: "me", text: input }]);
+
     setInput("");
+  };
+
+  const handleDealComplete = async () => {
+    try {
+      await axios.post(
+        `/chatrooms/${chatId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setIsDealEnded(true);
+      setShowModal(false);
+    } catch (err) {
+      alert("거래 종료 실패");
+    }
   };
 
   return (
     <LayoutWrapper>
       <Wrapper>
         <Header>
-          <HeaderLeft>
-            <FaChevronLeft onClick={() => navigate("/ChatRooms")} />
-            <div>
-              <Title>채팅방 {chatId}</Title>
-              <SubTitle>{isOwner ? "개설자" : "참여자"}</SubTitle>
-            </div>
-          </HeaderLeft>
+          <FaChevronLeft onClick={() => navigate("/ChatRooms")} />
+          <HeaderInfo>
+            <Title>{postTitle}</Title>
+            <SubTitle>
+              {participantCount}명 / {participantLimit}명 | {isOwner ? "개설자" : "참여자"}
+            </SubTitle>
+          </HeaderInfo>
+          {isOwner && !isDealEnded && (
+            <EndButton onClick={() => setShowModal(true)}>거래 완료하기</EndButton>
+          )}
+          {isOwner && isDealEnded && <EndDoneButton disabled>거래 종료</EndDoneButton>}
         </Header>
 
         <MessagesArea>
           {messages.map((msg, i) => (
-            <MessageContainer key={i} isMe={msg.sender === "me"}>
-              {msg.sender !== "me" && <Sender>{msg.sender}</Sender>}
-              <MessageBubble isMe={msg.sender === "me"}>
-                {msg.text}
-              </MessageBubble>
+            <MessageContainer key={i} isMe={msg.senderId === userId}>
+              {msg.senderId !== userId && <Sender>{msg.sender}</Sender>}
+              <MessageBubble isMe={msg.senderId === userId}>{msg.text}</MessageBubble>
             </MessageContainer>
           ))}
         </MessagesArea>
 
-        {!isDealEnded && (
+        {isDealEnded ? (
+          <DealEndedText>거래가 종료된 채팅방입니다.</DealEndedText>
+        ) : (
           <InputBox>
             <ChatInput
               type="text"
@@ -102,10 +160,25 @@ export default function ChatRoom() {
           </InputBox>
         )}
       </Wrapper>
+
+      {showModal && (
+        <ModalOverlay>
+          <ModalContent>
+            <ModalText>거래를 종료하시겠습니까?</ModalText>
+            <ModalActions>
+              <ModalButton gray onClick={() => setShowModal(false)}>
+                아니요
+              </ModalButton>
+              <ModalButton onClick={handleDealComplete}>예</ModalButton>
+            </ModalActions>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </LayoutWrapper>
   );
 }
-// ✅ styled-components (생략 없이 포함)
+
+//✅ styled-components
 const LayoutWrapper = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -121,53 +194,54 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 `;
 
 const Header = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid #e5e7eb;
 `;
 
-const HeaderLeft = styled.div`
-  display: flex;
-  align-items: center;
-  svg {
-    color: #374151;
-    margin-right: 8px;
-    cursor: pointer;
-  }
+const HeaderInfo = styled.div`
+  flex: 1;
+  margin: 0 8px;
 `;
 
 const Title = styled.div`
+  font-size: 16px;
   font-weight: bold;
 `;
+
 const SubTitle = styled.div`
   font-size: 12px;
   color: #6b7280;
 `;
 
 const EndButton = styled.button`
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
   padding: 6px 12px;
-  border-radius: 8px;
-  background-color: ${({ ended }) => (ended ? "#D1D5DB" : "#3B82F6")};
-  color: ${({ ended }) => (ended ? "#6B7280" : "white")};
+  background-color: #3b82f6;
+  color: white;
   border: none;
-  cursor: ${({ ended }) => (ended ? "not-allowed" : "pointer")};
+  border-radius: 6px;
+  cursor: pointer;
+`;
+
+const EndDoneButton = styled(EndButton)`
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: default;
 `;
 
 const MessagesArea = styled.div`
   flex: 1;
-  padding: 8px 16px;
+  padding: 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 `;
 
 const MessageContainer = styled.div`
@@ -181,6 +255,7 @@ const Sender = styled.div`
   color: #6b7280;
   margin-bottom: 4px;
 `;
+
 const MessageBubble = styled.div`
   max-width: 70%;
   padding: 8px 16px;
@@ -205,7 +280,7 @@ const DealEndedText = styled.div`
   font-size: 14px;
   color: #6b7280;
   background-color: #f3f4f6;
-  padding: 8px 0;
+  padding: 12px 0;
   border-top: 1px solid #e5e7eb;
 `;
 
@@ -239,7 +314,7 @@ const SendButton = styled.button`
 const ModalOverlay = styled.div`
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -250,7 +325,7 @@ const ModalContent = styled.div`
   background-color: white;
   border-radius: 12px;
   padding: 24px;
-  width: 288px;
+  width: 280px;
   text-align: center;
 `;
 

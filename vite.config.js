@@ -16,14 +16,13 @@ export default defineConfig({
   define: {
     global: 'window', // 🔥 핵심 해결 포인트
   },
-  server: {
-    proxy: {
-      '/ws': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-      },
+server: {
+  proxy: {
+    '/ws': {
+      target: 'http://localhost:8080',
+      ws: true,
+      changeOrigin: true,
     },
   },
+},
 });
