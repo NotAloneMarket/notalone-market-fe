@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaPen } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import sampleImg from "../../assets/sample.png"; // 또는 상대경로: ../../assets/sample.png
+import "./Home.css";
+import sampleImg from "../../assets/sample.png";
 import * as S from "./Home.styles";
 
 export default function Home() {
@@ -77,7 +78,7 @@ export default function Home() {
         ))}
       </S.ProductList>
       {/* 글쓰기 버튼 */}
-      <S.FloatingButton onClick={() => navigate("/write")}>
+      <S.FloatingButton onClick={() => navigate("/group-purchase/create")}>
         <FaPen />
       </S.FloatingButton>
     </S.Container>

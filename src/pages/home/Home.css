@@ -1,0 +1,22 @@
+.floating-button {
+  position: fixed;
+  bottom: 80px; /* Tailwind의 bottom-20에 해당 */
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #3b82f6; /* Tailwind의 bg-blue-500 */
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 10;
+}
+
+.floating-button:hover {
+  background-color: #2563eb; /* bg-blue-600 느낌 */
+}
