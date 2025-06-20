@@ -62,7 +62,7 @@ export default function MyPage() {
               color: "#fff",
             }}
           >
-            <FaUserCircle size={60} />
+            <FaUserCircle size={60} onClick={() => navigate("/editprofile")} />
           </div>
           <FaEdit
             style={{
@@ -108,8 +108,12 @@ export default function MyPage() {
                 }}
               ></div>
               <div>
-                <div style={{ fontWeight: "bold", fontSize: 14 }}>{purchase.item}</div>
-                <div style={{ fontSize: 12, color: "#999" }}>{purchase.date}</div>
+                <div style={{ fontWeight: "bold", fontSize: 14 }}>
+                  {purchase.item}
+                </div>
+                <div style={{ fontSize: 12, color: "#999" }}>
+                  {purchase.date}
+                </div>
               </div>
             </div>
             <FaChevronRight color="#ccc" />
@@ -142,7 +146,7 @@ export default function MyPage() {
         >
           Logout
         </button>
-        <BottomNav/>
+        <BottomNav />
       </div>
     </div>
   );

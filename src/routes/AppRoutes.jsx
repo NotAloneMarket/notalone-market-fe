@@ -11,7 +11,7 @@ import Login from "@/pages/onboarding/Login";
 import Join from "@/pages/onboarding/Join";
 import MyPage from "@/pages/mypage/MyPage";
 import EditProfile from "@/pages/mypage/EditProfile";
-
+import GroupPurchaseCreatePage from "@/pages/groupPurchase/GroupPurchaseCreatePage";
 
 export default function AppRoutes() {
   return (
