@@ -1,28 +1,113 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import sampleImg from "../../assets/sample.png";
 
-function ProductUploadPage() {
+const Container = styled.div`
+  width: 390px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: sans-serif;
+`;
+
+const Label = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.3rem;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+`;
+
+const Grid = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+  resize: none;
+`;
+
+const UploadButton = styled.button`
+  width: 100%;
+  background: #4d7adb;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+`;
+
+const Thumbnail = styled.div`
+  width: 100%;
+  height: 180px;
+  background: #ccc;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  margin-top: 30px;
+  margin-bottom: 1rem;
+  color: white;
+  overflow: hidden;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
+function ProductUploadPage({ onUpload }) {
   const navigate = useNavigate();
-
   const [form, setForm] = useState({
     category: "",
-    productName: "단백질 쉐이크 18개입",
-    totalAmount: 24000,
-    totalQuantity: 18,
-    userQuantity: 2,
-    maxParticipants: 4,
-    description: "단백질 쉐이크 같이 사실 분 구합니다\n채팅방 들어와주세요",
-    productLink: "https://link.coupang.com/a/cneppo",
+    productName: "",
+    totalAmount: "",
+    totalQuantity: "",
+    userQuantity: "",
+    maxParticipants: "",
+    description: "",
+    productLink: "",
   });
 
   const [pricePerPerson, setPricePerPerson] = useState(0);
 
   useEffect(() => {
-    const perItemPrice =
-      form.totalQuantity > 0 ? form.totalAmount / form.totalQuantity : 0;
-    const personalPrice = perItemPrice * form.userQuantity;
+    const total = Number(form.totalAmount);
+    const quantity = Number(form.totalQuantity);
+    const userQty = Number(form.userQuantity);
+    const perItemPrice = quantity > 0 ? total / quantity : 0;
+    const personalPrice = perItemPrice * userQty;
     setPricePerPerson(Math.floor(personalPrice));
-  }, [form.totalAmount, form.totalQuantity, form.userQuantity]);
+  }, [form]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,152 +115,136 @@ function ProductUploadPage() {
   };
 
   const handleUpload = () => {
-    alert("업로드 완료!");
-    // TODO: 업로드 처리 로직
+    if (!form.productName || !form.totalAmount || !form.totalQuantity) {
+      alert("상품명, 총 금액, 수량은 필수 항목입니다.");
+      return;
+    }
+
+    const newProduct = {
+      id: crypto.randomUUID(),
+      title: form.productName,
+      price: `${pricePerPerson.toLocaleString()} 원`,
+      chatCount: Number(form.maxParticipants || 0),
+      image: sampleImg,
+    };
+
+    onUpload(newProduct);
     navigate("/Home");
   };
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto px-4 py-6 font-sans">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 text-gray-600 hover:text-black"
-      >
-        {"<"} 뒤로가기
-      </button>
-
-      {/* 이미지 업로드 박스 */}
-      <div className="w-full h-72 bg-gray-400 rounded-xl flex items-center justify-center mb-6">
-        <span role="img" aria-label="camera" className="text-4xl">
-          📷
-        </span>
-      </div>
-
-      {/* 카테고리 */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium">카테고리</label>
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          className="mt-1 w-full p-2 border rounded-lg"
-        >
-          <option value="">선택하세요</option>
-          <option value="식품">식품</option>
-          <option value="생활용품">생활용품</option>
-          <option value="기타">기타</option>
-        </select>
-      </div>
-
-      {/* 상품명 */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium">상품명</label>
-        <input
-          type="text"
-          name="productName"
-          value={form.productName}
-          onChange={handleChange}
-          className="mt-1 w-full p-2 border rounded-lg"
+    <Container>
+      <>
+        <HiddenInput
+          id="imageUpload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
         />
-      </div>
+        <label htmlFor="imageUpload">
+          <Thumbnail>
+            {imagePreview ? (
+              <img src={imagePreview} alt="preview" />
+            ) : (
+              "사진 추가"
+            )}
+          </Thumbnail>
+        </label>
+      </>
 
-      {/* 총 금액 */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium">총 금액</label>
-        <input
-          type="number"
-          name="totalAmount"
-          value={form.totalAmount}
-          onChange={handleChange}
-          className="mt-1 w-full p-2 border rounded-lg"
-        />
-      </div>
+      <Label>카테고리</Label>
+      <Select name="category" value={form.category || ""} onChange={handleChange}>
+        <option value="">선택하세요</option>
+        <option value="식품">식품</option>
+        <option value="생활용품">생활용품</option>
+        <option value="기타">기타</option>
+      </Select>
 
-      {/* 수량 입력 */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium">총 수량</label>
-          <input
-            type="number"
+      <Label>상품명</Label>
+      <Input
+        name="productName"
+        value={form.productName || ""}
+        onChange={handleChange}
+      />
+
+      <Label>총 금액</Label>
+      <Input
+        name="totalAmount"
+        value={form.totalAmount || ""}
+        onChange={handleChange}
+        type="number"
+      />
+
+      <Grid>
+        <div style={{ flex: 1 }}>
+          <Label>총 수량</Label>
+          <Input
             name="totalQuantity"
-            value={form.totalQuantity}
+            value={form.totalQuantity || ""}
             onChange={handleChange}
-            className="mt-1 w-full p-2 border rounded-lg"
+            type="number"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium">
-            본인이 구매할 수량
-          </label>
-          <input
-            type="number"
+        <div style={{ flex: 1 }}>
+          <Label>본인이 구매할 수량</Label>
+          <Input
             name="userQuantity"
-            value={form.userQuantity}
+            value={form.userQuantity || ""}
             onChange={handleChange}
-            className="mt-1 w-full p-2 border rounded-lg"
+            type="number"
           />
         </div>
-      </div>
+      </Grid>
 
-      {/* 제한 인원 / 1인당 금액 */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block text-sm font-medium">공구 인원 제한</label>
-          <input
-            type="number"
+      <Grid>
+        <div style={{ flex: 1 }}>
+          <Label>공구 인원 제한</Label>
+          <Input
             name="maxParticipants"
-            value={form.maxParticipants}
+            value={form.maxParticipants || ""}
             onChange={handleChange}
-            className="mt-1 w-full p-2 border rounded-lg"
+            type="number"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium">1인당 예상 금액</label>
-          <input
-            type="number"
-            value={pricePerPerson}
-            readOnly
-            className="mt-1 w-full p-2 border rounded-lg bg-gray-100"
-          />
-          <p className="text-[11px] text-red-500 mt-1">
-            본인 구매 기준 예상 금액은 {pricePerPerson.toLocaleString()}원
-            입니다
+        <div style={{ flex: 1 }}>
+          <Label>1개 당 예상 금액</Label>
+          <Input value={pricePerPerson} readOnly />
+          <p style={{ fontSize: 11, color: "#ef4444" }}>
+            1명 당 예상 금액은 {pricePerPerson.toLocaleString()} 원입니다
           </p>
         </div>
-      </div>
+      </Grid>
 
-      {/* 설명 */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium">설명</label>
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          rows={3}
-          className="mt-1 w-full p-2 border rounded-lg resize-none"
-        />
-      </div>
+      <Label>설명</Label>
+      <TextArea
+        name="description"
+        value={form.description || ""}
+        onChange={handleChange}
+        rows={3}
+        placeholder="상세 설명을 입력하세요"
+      />
 
-      {/* 상품 링크 */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium">상품 링크</label>
-        <input
-          type="text"
-          name="productLink"
-          value={form.productLink}
-          onChange={handleChange}
-          className="mt-1 w-full p-2 border rounded-lg"
-        />
-      </div>
+      <Label>상품 링크</Label>
+      <Input
+        name="productLink"
+        value={form.productLink || ""}
+        onChange={handleChange}
+        placeholder="https://example.com/product"
+      />
 
-      {/* 업로드 버튼 */}
-      <button
-        onClick={handleUpload}
-        className="w-full py-3 bg-[#4D7ADB] text-white font-semibold rounded-xl hover:bg-[#3B6AD4] transition"
-      >
-        업로드 하기
-      </button>
-    </div>
+      <UploadButton onClick={handleUpload}>업로드 하기</UploadButton>
+    </Container>
   );
 }
 
