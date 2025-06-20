@@ -11,7 +11,7 @@ import Login from "@/pages/onboarding/Login";
 import Join from "@/pages/onboarding/Join";
 import MyPage from "@/pages/mypage/MyPage";
 import EditProfile from "@/pages/mypage/EditProfile";
-import GroupPurchaseCreatePage from "@/pages/groupPurchase/GroupPurchaseCreatePage";
+import ProductUpload from "@/pages/groupPurchase/ProductUpload";
 
 export default function AppRoutes() {
   return (
@@ -21,10 +21,6 @@ export default function AppRoutes() {
       <Route path="/Join" element={<Join />} />
       <Route path="/" element={<OnBoarding />} />
       <Route path="/ChatRoom" element={<ChatRoom />} />
-      <Route
-        path="/group-purchase/create"
-        element={<GroupPurchaseCreatePage />}
-      />
 
       {/* 공통 레이아웃이 적용되는 페이지 */}
       <Route
@@ -72,6 +68,14 @@ export default function AppRoutes() {
         element={
           <MainLayout>
             <EditProfile />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/ProductUpload"
+        element={
+          <MainLayout>
+            <ProductUpload />
           </MainLayout>
         }
       />
