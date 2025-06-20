@@ -1,14 +1,34 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import axios from "../../api/axiosInstance"; 
 
 export default function Login() {
   const navigate = useNavigate();
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    alert(`ID: ${id}, PW: ${password}`);
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("/user/login", {
+        loginId: id,
+        password: password,
+      });
+
+      const { token, userId } = response.data;
+
+      // 토큰을 localStorage 또는 sessionStorage에 저장
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", userId);
+
+      console.log("token: ", token);
+      // 홈 화면으로 이동
+      navigate("/Home");
+    } catch (err) {
+      console.error(err);
+      setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+    }
   };
 
   return (
@@ -98,6 +118,12 @@ export default function Login() {
             }}
           />
         </div>
+
+        {error && (
+          <div style={{ color: "red", fontSize: "13px", marginBottom: "16px", textAlign: "center" }}>
+            {error}
+          </div>
+        )}
 
         <button
           onClick={handleLogin}

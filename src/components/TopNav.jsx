@@ -52,9 +52,8 @@ export default function TopNav({ searchOpen, setSearchOpen }) {
 }
 
 const Wrapper = styled.div`
-  width: 390px;
+  width: 100%;
   max-width: 390px;
-  margin: 0 auto;
   height: 56px;
   position: fixed;
   top: 0;
@@ -89,6 +88,11 @@ const SearchBox = styled.div`
   margin: 56px auto 0 auto;
   padding: 1rem;
   background-color: white;
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 49;
 `;
 
 const SearchInput = styled.input`

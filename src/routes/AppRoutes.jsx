@@ -11,7 +11,6 @@ import Login from "@/pages/onboarding/Login";
 import Join from "@/pages/onboarding/Join";
 import MyPage from "@/pages/mypage/MyPage";
 import EditProfile from "@/pages/mypage/EditProfile";
-import ChangePassword from "@/pages/mypage/ChangePassword";
 
 export default function AppRoutes() {
   return (
@@ -68,14 +67,6 @@ export default function AppRoutes() {
         element={
           <MainLayout>
             <EditProfile />
-          </MainLayout>
-        }
-      />
-      <Route
-        path="/ChangePassword"
-        element={
-          <MainLayout>
-            <ChangePassword />
           </MainLayout>
         }
       />
