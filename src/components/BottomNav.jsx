@@ -38,12 +38,11 @@ export default function BottomNav() {
 
 const NavWrapper = styled.nav`
   position: fixed;
-  width: 390px;
-  max-width: 390px;
-  margin: 0 auto;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 390px;
   height: 56px;
   background-color: #fff;
   border-top: 1px solid #eee;

@@ -1,35 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "../../api/axiosInstance"; // baseURL 설정된 axios
 import styled, { css } from "styled-components";
 
 export default function ChatRoom() {
   const navigate = useNavigate();
+  const { chatId } = useParams(); // /ChatRoom/:chatId
 
-  const [isOwner, setIsOwner] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
   const [isDealEnded, setIsDealEnded] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "무지한 무지", text: "안녕하세요" },
-    { id: 2, sender: "이상한 나라의 단무지", text: "블라블라블라블라블라" },
-    {
-      id: 3,
-      sender: isOwner ? "나" : "내가 바로 주최자",
-      text: "두 분 더 들어오면 거래 시작할게요",
-    },
-    { id: 4, sender: "me", text: "안녕하세요" },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const userId = 1; // 로그인 사용자 (임시로 하드코딩)
+
+  useEffect(() => {
+    // 참여 정보 가져오기
+    axios.get(`/api/chat/${chatId}/status?userId=${userId}`).then(res => {
+      setIsOwner(res.data.isOwner);
+      setIsDealEnded(res.data.isDealEnded);
+    });
+
+    // 메시지 불러오기
+    axios.get(`/api/chat/${chatId}/messages`).then(res => {
+      setMessages(res.data);
+    });
+  }, [chatId]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    setMessages([...messages, { id: Date.now(), sender: "me", text: input }]);
-    setInput("");
+
+    axios.post(`/api/chat/${chatId}/message`, {
+      senderId: userId,
+      content: input,
+    }).then(() => {
+      setMessages([...messages, { id: Date.now(), sender: "me", text: input }]);
+      setInput("");
+    });
   };
 
   const handleDealEnd = () => {
-    setIsDealEnded(true);
-    setShowModal(false);
+    axios.post(`/api/chat/${chatId}/complete?userId=${userId}`).then(() => {
+      setIsDealEnded(true);
+      setShowModal(false);
+    });
   };
 
   return (
@@ -39,8 +54,8 @@ export default function ChatRoom() {
           <HeaderLeft>
             <FaChevronLeft onClick={() => navigate("/ChatRooms")} />
             <div>
-              <Title>제주 감귤 10kg</Title>
-              <SubTitle>2명 / 3명 {isOwner ? "개설자" : "참여자"}</SubTitle>
+              <Title>채팅방 {chatId}</Title>
+              <SubTitle>{isOwner ? "개설자" : "참여자"}</SubTitle>
             </div>
           </HeaderLeft>
           {isOwner && (
@@ -98,6 +113,7 @@ export default function ChatRoom() {
   );
 }
 
+// ✅ styled-components (생략 없이 포함)
 const LayoutWrapper = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -134,14 +150,8 @@ const HeaderLeft = styled.div`
   }
 `;
 
-const Title = styled.div`
-  font-weight: bold;
-`;
-
-const SubTitle = styled.div`
-  font-size: 12px;
-  color: #6b7280;
-`;
+const Title = styled.div` font-weight: bold; `;
+const SubTitle = styled.div` font-size: 12px; color: #6b7280; `;
 
 const EndButton = styled.button`
   font-size: 14px;
@@ -169,12 +179,7 @@ const MessageContainer = styled.div`
   align-items: ${({ isMe }) => (isMe ? "flex-end" : "flex-start")};
 `;
 
-const Sender = styled.div`
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 4px;
-`;
-
+const Sender = styled.div` font-size: 12px; color: #6b7280; margin-bottom: 4px; `;
 const MessageBubble = styled.div`
   max-width: 70%;
   padding: 8px 16px;
@@ -248,10 +253,7 @@ const ModalContent = styled.div`
   text-align: center;
 `;
 
-const ModalText = styled.p`
-  margin-bottom: 16px;
-  font-weight: 500;
-`;
+const ModalText = styled.p` margin-bottom: 16px; font-weight: 500; `;
 
 const ModalActions = styled.div`
   display: flex;

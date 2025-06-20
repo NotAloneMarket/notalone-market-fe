@@ -11,9 +11,7 @@ import Login from "@/pages/onboarding/Login";
 import Join from "@/pages/onboarding/Join";
 import MyPage from "@/pages/mypage/MyPage";
 import EditProfile from "@/pages/mypage/EditProfile";
-import ChangePassword from "@/pages/mypage/ChangePassword";
-import GroupPurchaseCreatePage from "@/pages/groupPurchase/GroupPurchaseCreatePage";
-import GroupPurchaseDetailPage from "@/pages/groupPurchase/GroupPurchaseDetailPage";
+
 
 export default function AppRoutes() {
   return (
@@ -77,16 +75,6 @@ export default function AppRoutes() {
           </MainLayout>
         }
       />
-      <Route
-        path="/ChangePassword"
-        element={
-          <MainLayout>
-            <ChangePassword />
-          </MainLayout>
-        }
-      />
-
-      <Route path="/group-purchase" element={<GroupPurchaseDetailPage />} />
     </Routes>
   );
 }

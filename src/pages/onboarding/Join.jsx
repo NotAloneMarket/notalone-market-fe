@@ -5,10 +5,9 @@ import {
   FaIdBadge,
   FaPhone,
   FaLock,
-  FaCheckSquare,
-  FaRegSquare,
   FaUniversity,
 } from "react-icons/fa";
+import axios from "../../api/axiosInstance"; // axios 인스턴스 생성해 둔 파일 (interceptor 포함되면 더 좋아요)
 
 export default function Join() {
   const navigate = useNavigate();
@@ -30,13 +29,36 @@ export default function Join() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.agreed) {
       alert("약관에 동의해주세요.");
       return;
     }
-    alert("회원가입 완료");
-    navigate("/Login");
+
+    if (form.password !== form.passwordConfirm) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      const payload = {
+        loginId: form.username,
+        password: form.password,
+        nickname: form.nickname,
+        phoneNum: form.phone,
+        accountNumber: form.account,
+      };
+
+      const res = await axios.post("http://localhost:8080/user/register", payload);
+
+      if (res.status === 201) {
+        alert("회원가입이 완료되었습니다.");
+        navigate("/Login");
+      }
+    } catch (err) {
+      console.error("회원가입 오류:", err);
+      alert("회원가입 실패. 이미 존재하는 아이디일 수 있습니다.");
+    }
   };
 
   const renderInput = (icon, placeholder, name, type = "text") => (
@@ -90,7 +112,6 @@ export default function Join() {
           boxShadow: "0 0 10px rgba(0,0,0,0.05)",
         }}
       >
-        {/* 상단 로고/제목 */}
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#5a6ef5", marginBottom: "8px" }}>
             나혼자 안산다
@@ -100,20 +121,17 @@ export default function Join() {
           </p>
         </div>
 
-        {/* 페이지 제목 */}
         <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", marginBottom: "24px" }}>
           회원가입
         </div>
 
-        {/* 입력 폼 */}
         {renderInput(<FaUser />, "닉네임", "nickname")}
         {renderInput(<FaIdBadge />, "아이디", "username")}
         {renderInput(<FaPhone />, "전화번호", "phone")}
         {renderInput(<FaLock />, "비밀번호", "password", "password")}
-        {renderInput(<FaLock />, "비밀번호 확인을 위해 비밀번호 재입력", "passwordConfirm", "password")}
+        {renderInput(<FaLock />, "비밀번호 확인", "passwordConfirm", "password")}
         {renderInput(<FaUniversity />, "계좌번호", "account")}
 
-        {/* 약관 동의 */}
         <label
           style={{
             display: "flex",
@@ -140,7 +158,6 @@ export default function Join() {
           </span>
         </label>
 
-        {/* 가입 버튼 */}
         <button
           onClick={handleSubmit}
           style={{
@@ -159,7 +176,6 @@ export default function Join() {
           회원가입 완료
         </button>
 
-        {/* 하단 로그인 유도 */}
         <div style={{ textAlign: "center", fontSize: 13, color: "#888" }}>
           이미 계정이 있으신가요?{" "}
           <span
