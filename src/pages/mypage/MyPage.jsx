@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle, FaEdit, FaChevronRight } from "react-icons/fa";
+import axios from "axios";
 import BottomNav from "../../components/BottomNav";
+
 export default function MyPage() {
   const navigate = useNavigate();
 
@@ -10,6 +12,30 @@ export default function MyPage() {
     { item: "이케아 - 원목 책상 협탁", date: "2025.03.01" },
     { item: "코스트코 - 2L 생수 5개 묶음", date: "2025.03.01" },
   ];
+
+  const [nickname, setNickname] = useState("");
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("/user/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("✅ 사용자 정보:", res.data);
+        setNickname(res.data.nickname);
+        setProfileImageUrl("http://localhost:8080" + res.data.profileImageUrl);
+      } catch (err) {
+        console.error("❌ 사용자 정보를 불러오지 못했습니다", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", backgroundColor: "#fff" }}>
@@ -60,11 +86,21 @@ export default function MyPage() {
               justifyContent: "center",
               fontSize: 36,
               color: "#fff",
+              overflow: "hidden",
             }}
           >
-            <FaUserCircle size={60} onClick={() => navigate("/editprofile")} />
+            {profileImageUrl ? (
+              <img
+                src={profileImageUrl}
+                alt="프로필 이미지"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <FaUserCircle size={60} />
+            )}
           </div>
           <FaEdit
+            onClick={() => navigate("/editprofile")}
             style={{
               position: "absolute",
               right: 0,
@@ -74,11 +110,11 @@ export default function MyPage() {
               borderRadius: "50%",
               padding: 4,
               fontSize: 12,
+              cursor: "pointer",
             }}
           />
         </div>
-        <div style={{ marginTop: 8, fontWeight: "bold" }}>닉네임</div>
-        <div style={{ fontSize: 13, color: "#888" }}>swsystempg@google.com</div>
+        <div style={{ marginTop: 8, fontWeight: "bold" }}>{nickname}</div>
       </div>
 
       {/* 거래 내역 */}
