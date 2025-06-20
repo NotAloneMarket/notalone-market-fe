@@ -79,7 +79,6 @@ useEffect(() => {
 
   return () => client.deactivate();
 }, [chatId, token, userId]);
-s
 
   const handleSend = () => {
     if (!input.trim() || !stompClient) return;
