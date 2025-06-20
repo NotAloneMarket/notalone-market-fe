@@ -38,13 +38,11 @@ export default function Home() {
       const transformed = filtered.map((item) => ({
         id: item.id,
         title: item.title,
-        price: item.totalQuantity
-          ? `${Math.floor(item.totalAmount / item.totalQuantity)} 원`
-          : "가격 정보 없음",
+        price: `${Math.floor(item.totalAmount / item.totalQuantity)} 원`,
         chatCount: 0,
-        image: item.imageUrl
+        image: item.imageUrl?.startsWith("/uploads")
           ? `http://localhost:8080${item.imageUrl}`
-          : sampleImg,
+          : sampleImg, // 로컬 이미지 대체
       }));
 
       setProductList(transformed);
