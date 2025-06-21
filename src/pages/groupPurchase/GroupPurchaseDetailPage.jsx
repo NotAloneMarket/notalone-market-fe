@@ -9,8 +9,8 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 export default function GroupPurchaseDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [post, setPost] = useState(null);
+  const [participantCount, setParticipantCount] = useState(0);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -29,6 +29,39 @@ export default function GroupPurchaseDetailPage() {
     fetchPost();
   }, [id]);
 
+  useEffect(() => {
+    if (!post) return; // 내부에서 조건 걸기
+    const fetchChatRoomParticipantCount = async () => {
+      try {
+        const res1 = await axios.get(
+          `http://localhost:8080/chatrooms/post/${id}/room`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const chatRoomId = res1.data.chatRoomId;
+
+        const res2 = await axios.get(
+          `http://localhost:8080/chatrooms/${chatRoomId}/count`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        setParticipantCount(res2.data.participantCount);
+      } catch (err) {
+        console.error("참여자 수 조회 실패", err);
+      }
+    };
+
+    fetchChatRoomParticipantCount();
+  }, [post, id]);
+
   if (!post) return <div>불러오는 중...</div>;
 
   const {
@@ -36,15 +69,13 @@ export default function GroupPurchaseDetailPage() {
     description,
     totalAmount,
     totalQuantity,
-    myQuantity,
     pricePerItem,
     participantLimit,
     categoryName,
     imageUrl,
     productUrl,
+    nickname,
   } = post;
-
-  const availableQuantity = totalQuantity - myQuantity;
 
   return (
     <div className="detail-page">
@@ -91,13 +122,7 @@ export default function GroupPurchaseDetailPage() {
             <span>{totalQuantity} 개</span>
           </div>
 
-          <div className="row">
-            <span>구매 가능 수량</span>
-            <span>{availableQuantity} 개</span>
-          </div>
-
           {/* 상품 링크 추가 */}
-
           {productUrl && (
             <div
               className="row"
@@ -140,8 +165,11 @@ export default function GroupPurchaseDetailPage() {
           <div className="unit-price">{pricePerItem.toLocaleString()} 원</div>
         </div>
         <div className="member-info">
-          {[...Array(participantLimit)].map((_, i) => (
-            <span key={i} className={`dot ${i < myQuantity ? "" : "empty"}`} />
+          {[...Array(participantLimit || 0)].map((_, i) => (
+            <span
+              key={i}
+              className={`dot ${i < participantCount ? "" : "empty"}`}
+            />
           ))}
         </div>
         <button
