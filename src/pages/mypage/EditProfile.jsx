@@ -76,26 +76,6 @@ export default function EditProfile() {
         paddingBottom: 40,
       }}
     >
-      {/* 상단바 */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: 16,
-          borderBottom: "1px solid #eee",
-        }}
-      >
-        <span
-          style={{ fontSize: 18, cursor: "pointer" }}
-          onClick={() => navigate(-1)}
-        >
-          ←
-        </span>
-        <h2 style={{ marginLeft: 10, fontSize: 16, fontWeight: "bold" }}>
-          내 정보 수정
-        </h2>
-      </div>
-
       {/* 프로필 */}
       <div style={{ textAlign: "center", marginTop: 32 }}>
         <div style={{ position: "relative", display: "inline-block" }}>

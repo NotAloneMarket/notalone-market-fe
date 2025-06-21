@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle, FaEdit, FaChevronRight } from "react-icons/fa";
+import { FaUserCircle, FaPen, FaChevronRight } from "react-icons/fa";
 import axios from "axios";
 import BottomNav from "../../components/BottomNav";
 
@@ -44,33 +44,6 @@ export default function MyPage() {
 
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", backgroundColor: "#fff" }}>
-      {/* 상단바 */}
-      <div
-        style={{
-          padding: "16px",
-          borderBottom: "1px solid #eee",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <span
-          onClick={() => navigate(-1)}
-          style={{ fontSize: 18, cursor: "pointer", marginRight: 12 }}
-        >
-          ←
-        </span>
-        <h2
-          style={{
-            fontSize: 16,
-            fontWeight: "bold",
-            color: "#5a6ef5",
-            textTransform: "uppercase",
-          }}
-        >
-          MY PAGE
-        </h2>
-      </div>
-
       {/* 프로필 */}
       <div
         style={{
@@ -104,28 +77,39 @@ export default function MyPage() {
               <FaUserCircle size={60} />
             )}
           </div>
-          <FaEdit
+          <div
             onClick={() => navigate("/editprofile")}
             style={{
               position: "absolute",
-              right: 0,
-              bottom: 0,
-              backgroundColor: "#f89c1c",
-              color: "white",
+              right: -6,
+              bottom: -6,
+              width: 32,
+              height: 32,
               borderRadius: "50%",
-              padding: 4,
-              fontSize: 12,
+              backgroundColor: "#f89c1c",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               cursor: "pointer",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+              zIndex: 2,
             }}
-          />
+          >
+            <FaPen
+              style={{
+                color: "#fff",
+                fontSize: 14,
+              }}
+            />
+          </div>
         </div>
         <div style={{ marginTop: 8, fontWeight: "bold" }}>{nickname}</div>
       </div>
 
-      {/* 거래 내역 */}
+      {/* 내가 쓴 글 */}
       <div style={{ padding: "20px" }}>
         <h3 style={{ fontSize: 14, fontWeight: "bold", marginBottom: 12 }}>
-          거래 내역
+          내가 쓴 글
         </h3>
 
         {purchases.map((purchase, index) => (
