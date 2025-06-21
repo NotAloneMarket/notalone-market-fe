@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle, FaPen, FaChevronRight } from "react-icons/fa";
-import axios from "axios";
+import axios from "@/api/axiosInstance";
 import BottomNav from "../../components/BottomNav";
 
 export default function MyPage() {
   const navigate = useNavigate();
 
-  const purchases = [
-    { item: "이케아 - 의자 양말", date: "2025.03.01" },
-    { item: "이케아 - 원목 책상 협탁", date: "2025.03.01" },
-    { item: "코스트코 - 2L 생수 5개 묶음", date: "2025.03.01" },
-  ];
-
   const [nickname, setNickname] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [myPosts, setMyPosts] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,7 +26,6 @@ export default function MyPage() {
           },
         });
 
-        console.log("✅ 사용자 정보:", res.data);
         setNickname(res.data.nickname);
         setProfileImageUrl("http://localhost:8080" + res.data.profileImageUrl);
       } catch (err) {
@@ -39,8 +33,25 @@ export default function MyPage() {
       }
     };
 
+    const fetchMyPosts = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("/posts/my", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Cache-Control": "no-cache", // 캐시 방지 헤더 추가
+          },
+        });
+        setMyPosts(res.data || []);
+        console.log("✅ 내가 쓴 글 응답:", res.data);
+      } catch (err) {
+        console.error("❌ 내가 쓴 글을 불러오지 못했습니다", err);
+      }
+    };
+
     fetchProfile();
-  }, []);
+    fetchMyPosts();
+  }, [navigate]);
 
   return (
     <div style={{ maxWidth: 480, margin: "0 auto", backgroundColor: "#fff" }}>
@@ -112,41 +123,53 @@ export default function MyPage() {
           내가 쓴 글
         </h3>
 
-        {purchases.map((purchase, index) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  backgroundColor: "#f0f0f0",
-                  marginRight: 12,
-                }}
-              ></div>
-              <div>
-                <div style={{ fontWeight: "bold", fontSize: 14 }}>
-                  {purchase.item}
-                </div>
-                <div style={{ fontSize: 12, color: "#999" }}>
-                  {purchase.date}
+        {myPosts.length === 0 ? (
+          <div style={{ color: "#aaa", fontSize: 14 }}>
+            작성한 글이 없습니다.
+          </div>
+        ) : (
+          myPosts.map((post) => (
+            <div
+              key={post.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 16,
+              }}
+              onClick={() => navigate(`/Detail/${post.id}`)}
+              cursor="pointer"
+            >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    backgroundColor: "#f0f0f0",
+                    marginRight: 12,
+                  }}
+                ></div>
+                <div>
+                  <div style={{ fontWeight: "bold", fontSize: 14 }}>
+                    {post.title}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#999" }}>
+                    {post.status === "open"
+                      ? "진행중"
+                      : post.status === "complete"
+                      ? "완료"
+                      : post.status}
+                  </div>
                 </div>
               </div>
+              <FaChevronRight color="#ccc" />
             </div>
-            <FaChevronRight color="#ccc" />
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
-      {/* Logout 버튼 */}
+      {/* 로그아웃 버튼 */}
       <div
         style={{
           padding: "20px",
