@@ -12,14 +12,18 @@ import MyPage from "@/pages/mypage/MyPage";
 import EditProfile from "@/pages/mypage/EditProfile";
 import ProductUpload from "@/pages/groupPurchase/ProductUpload";
 import GroupPurchaseDetailPage from "@/pages/groupPurchase/GroupPurchaseDetailPage";
+import LoginRedirect from "../pages/onboarding/LoginRedirect";
+import OnBoardingRedirect from "../pages/onboarding/OnBoardingRedirect";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* 레이아웃 없이 보여줄 페이지 */}
-      <Route path="/Login" element={<Login />} />
+      {/* <Route path="/Login" element={<Login />} /> */}
+      <Route path="/login" element={<LoginRedirect />} />
       <Route path="/Join" element={<Join />} />
-      <Route path="/" element={<OnBoarding />} />
+      {/* <Route path="/" element={<OnBoarding />} /> */}
+      <Route path="/" element={<OnBoardingRedirect />} />
       <Route path="/ChatRoom/:id" element={<ChatRoom />} />
       <Route path="/Detail/:id" element={<GroupPurchaseDetailPage />} />
 
