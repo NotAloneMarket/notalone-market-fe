@@ -1,3 +1,5 @@
+// 💬 ChatRoom.jsx
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
@@ -22,63 +24,58 @@ export default function ChatRoom() {
   const userId = Number(localStorage.getItem("userId"));
   const token = localStorage.getItem("token");
 
-  // 초기 데이터 조회
-useEffect(() => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  useEffect(() => {
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
 
-  // 메시지
-  axios.get(`/chatrooms/${chatId}/messages`, config).then((res) => {
-    const fetchedMessages = res.data.map((msg) => ({
-      senderId: msg.senderId,
-      sender: msg.sender,
-      text: msg.message,
-    }));
-    setMessages(fetchedMessages);
-  });
+    console.log(token);
 
-  // 게시글 정보
-  axios.get(`/posts/from-chatroom/${chatId}`, config).then((res) => {
-    const post = res.data[0];
-    console.log("게시글 정보", post);
-    setPostTitle(post.title);
-    setParticipantLimit(post.participantLimit);
-    setIsOwner(post.writerId === userId);
-  });
+    axios.get(`/chatrooms/${chatId}/messages`, config).then((res) => {
+      const fetchedMessages = res.data.map((msg) => ({
+        senderId: msg.senderId,
+        sender: msg.sender,
+        text: msg.message,
+      }));
+      setMessages(fetchedMessages);
+    });
 
-  // 참여자 수
-  axios.get(`/chatrooms/${chatId}/count`, config).then((res) => {
-    setParticipantCount(res.data.participantCount);
-  });
+    axios.get(`/posts/from-chatroom/${chatId}`, config).then((res) => {
+      const post = res.data;
+      setPostTitle(post.title);
+      setParticipantLimit(post.participantLimit);
+      setIsOwner(post.writerId === userId);
+      setIsDealEnded(post.completed);
+    });
 
-  // WebSocket 연결
-  const socket = new SockJS("http://localhost:8080/ws");
-  const client = new Client({
-    webSocketFactory: () => socket,
-    reconnectDelay: 5000,
-    onConnect: () => {
-      client.subscribe(`/topic/chat/${chatId}`, (message) => {
-        const newMessage = JSON.parse(message.body);
-        setMessages((prev) => [
-          ...prev,
-          {
-            senderId: newMessage.senderId,
-            sender: newMessage.sender,
-            text: newMessage.content,
-          },
-        ]);
-      });
-    },
-  });
+    axios.get(`/chatrooms/${chatId}/count`, config).then((res) => {
+      setParticipantCount(res.data.participantCount);
+    });
 
-  client.activate();
-  setStompClient(client);
+    const socket = new SockJS("http://localhost:8080/ws");
+    const client = new Client({
+      webSocketFactory: () => socket,
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/topic/chat/${chatId}`, (message) => {
+          const newMessage = JSON.parse(message.body);
+          setMessages((prev) => [
+            ...prev,
+            {
+              senderId: newMessage.senderId,
+              sender: newMessage.sender,
+              text: newMessage.content,
+            },
+          ]);
+        });
+      },
+    });
 
-  return () => client.deactivate();
-}, [chatId, token, userId]);
+    client.activate();
+    setStompClient(client);
+
+    return () => client.deactivate();
+  }, [chatId, token, userId]);
 
   const handleSend = () => {
     if (!input.trim() || !stompClient) return;
@@ -98,23 +95,24 @@ useEffect(() => {
     setInput("");
   };
 
-  const handleDealComplete = async () => {
-    try {
-      await axios.post(
-        `/chatrooms/${chatId}/complete`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setIsDealEnded(true);
-      setShowModal(false);
-    } catch (err) {
-      alert("거래 종료 실패");
-    }
-  };
+const handleDealComplete = async () => {
+  try {
+    await axios.put(
+      `/chatrooms/${chatId}/complete`,
+      {}, // 바디 필요 없으면 그대로 빈 객체
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    setIsDealEnded(true);
+    setShowModal(false);
+  } catch (err) {
+    alert("거래 종료 실패");
+    console.error(err); // 🔍 디버깅에 도움
+  }
+};
 
   return (
     <LayoutWrapper>
@@ -124,20 +122,31 @@ useEffect(() => {
           <HeaderInfo>
             <Title>{postTitle}</Title>
             <SubTitle>
-              {participantCount}명 / {participantLimit}명 | {isOwner ? "개설자" : "참여자"}
+              {participantCount}명 / {participantLimit}명 |{" "}
+              {isOwner ? "개설자" : "참여자"}
             </SubTitle>
           </HeaderInfo>
-          {isOwner && !isDealEnded && (
-            <EndButton onClick={() => setShowModal(true)}>거래 완료하기</EndButton>
+
+          {/* 👉 버튼 조건 분기 수정 */}
+          {!isDealEnded ? (
+            <EndButton
+              onClick={isOwner ? () => setShowModal(true) : undefined}
+              title={isOwner ? "" : "개설자만 거래를 종료할 수 있습니다"}
+            >
+              거래 완료하기
+            </EndButton>
+          ) : (
+            <EndDoneButton disabled>거래 종료</EndDoneButton>
           )}
-          {isOwner && isDealEnded && <EndDoneButton disabled>거래 종료</EndDoneButton>}
         </Header>
 
         <MessagesArea>
           {messages.map((msg, i) => (
             <MessageContainer key={i} isMe={msg.senderId === userId}>
               {msg.senderId !== userId && <Sender>{msg.sender}</Sender>}
-              <MessageBubble isMe={msg.senderId === userId}>{msg.text}</MessageBubble>
+              <MessageBubble isMe={msg.senderId === userId}>
+                {msg.text}
+              </MessageBubble>
             </MessageContainer>
           ))}
         </MessagesArea>
@@ -165,7 +174,7 @@ useEffect(() => {
           <ModalContent>
             <ModalText>거래를 종료하시겠습니까?</ModalText>
             <ModalActions>
-              <ModalButton gray onClick={() => setShowModal(false)}>
+              <ModalButton $cancel onClick={() => setShowModal(false)}>
                 아니요
               </ModalButton>
               <ModalButton onClick={handleDealComplete}>예</ModalButton>
@@ -177,7 +186,7 @@ useEffect(() => {
   );
 }
 
-//✅ styled-components
+// Styled Components 아래에 계속
 const LayoutWrapper = styled.div`
   width: 100vw;
   min-height: 100vh;
@@ -218,7 +227,7 @@ const SubTitle = styled.div`
   color: #6b7280;
 `;
 
-const EndButton = styled.button`
+const DealButton = styled.button`
   font-size: 12px;
   padding: 6px 12px;
   background-color: #3b82f6;
@@ -228,10 +237,12 @@ const EndButton = styled.button`
   cursor: pointer;
 `;
 
-const EndDoneButton = styled(EndButton)`
-  background-color: #d1d5db;
+const DealEndedText = styled.div`
+  font-size: 12px;
+  padding: 6px 12px;
   color: #6b7280;
-  cursor: default;
+  background-color: #e5e7eb;
+  border-radius: 6px;
 `;
 
 const MessagesArea = styled.div`
@@ -274,15 +285,6 @@ const MessageBubble = styled.div`
         `}
 `;
 
-const DealEndedText = styled.div`
-  text-align: center;
-  font-size: 14px;
-  color: #6b7280;
-  background-color: #f3f4f6;
-  padding: 12px 0;
-  border-top: 1px solid #e5e7eb;
-`;
-
 const InputBox = styled.div`
   display: flex;
   align-items: center;
@@ -313,11 +315,42 @@ const SendButton = styled.button`
 const ModalOverlay = styled.div`
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 50;
+`;
+
+const EndButton = styled.button`
+  font-size: 12px;
+  padding: 6px 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+`;
+
+const EndDoneButton = styled(EndButton)`
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: default;
+`;
+
+
+
+const ModalButton = styled.button`
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: ${({ $cancel }) => ($cancel ? "#e5e7eb" : "#3b82f6")};
+  color: ${({ $cancel }) => ($cancel ? "#111827" : "white")};
 `;
 
 const ModalContent = styled.div`
@@ -328,30 +361,14 @@ const ModalContent = styled.div`
   text-align: center;
 `;
 
-const ModalText = styled.p`
-  margin-bottom: 16px;
-  font-weight: 500;
-`;
-
 const ModalActions = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 10px;
 `;
 
-const ModalButton = styled.button`
-  width: 45%;
-  padding: 8px 0;
-  border-radius: 8px;
-  border: none;
-  font-weight: 500;
-  ${({ gray }) =>
-    gray
-      ? css`
-          background-color: #e5e7eb;
-          color: black;
-        `
-      : css`
-          background-color: #3b82f6;
-          color: white;
-        `}
+const ModalText = styled.p`
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
 `;
