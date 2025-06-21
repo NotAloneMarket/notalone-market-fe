@@ -6,8 +6,7 @@ export const PageWrapper = styled.div`
   max-width: 390px;
   width: 100%;
   margin: 0 auto;
-  padding-bottom: 4rem;
-
+  padding-bottom: 39px;
   display: flex;
   flex-direction: column;
 `;

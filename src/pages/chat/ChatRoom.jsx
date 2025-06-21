@@ -1,5 +1,3 @@
-// 💬 ChatRoom.jsx
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
@@ -29,8 +27,6 @@ export default function ChatRoom() {
       headers: { Authorization: `Bearer ${token}` },
     };
 
-    console.log(token);
-
     axios.get(`/chatrooms/${chatId}/messages`, config).then((res) => {
       const fetchedMessages = res.data.map((msg) => ({
         senderId: msg.senderId,
@@ -45,7 +41,13 @@ export default function ChatRoom() {
       setPostTitle(post.title);
       setParticipantLimit(post.participantLimit);
       setIsOwner(post.writerId === userId);
-      setIsDealEnded(post.completed);
+      // 👇 이거는 더 이상 거래 완료 여부 판단에 사용하지 않음
+      // setIsDealEnded(post.completed === "Y");
+    });
+
+    // ✅ 채팅방의 거래 완료 여부를 직접 확인해서 반영!
+    axios.get(`/chatrooms/${chatId}`, config).then((res) => {
+      setIsDealEnded(res.data.isCompleted === "Y");
     });
 
     axios.get(`/chatrooms/${chatId}/count`, config).then((res) => {
@@ -95,24 +97,43 @@ export default function ChatRoom() {
     setInput("");
   };
 
-const handleDealComplete = async () => {
-  try {
-    await axios.put(
-      `/chatrooms/${chatId}/complete`,
-      {}, // 바디 필요 없으면 그대로 빈 객체
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    setIsDealEnded(true);
-    setShowModal(false);
-  } catch (err) {
-    alert("거래 종료 실패");
-    console.error(err); // 🔍 디버깅에 도움
-  }
-};
+  const handleDealComplete = async () => {
+    try {
+      // 1. postId 얻기
+      const postRes = await axios.get(`/posts/from-chatroom/${chatId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const postId = postRes.data.id;
+
+      // 2. 게시글 상태 완료 처리
+      await axios.post(`/posts/${postId}/complete`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 3. 채팅방 거래 종료
+      await axios.put(
+        `/chatrooms/${chatId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // 4. 구매 내역 생성
+      await axios.post(`/buyHistory/create`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setIsDealEnded(true);
+      setShowModal(false);
+      alert("거래가 완료되었습니다.");
+    } catch (err) {
+      alert("거래 완료 처리 중 오류가 발생했습니다.");
+      console.error("거래 완료 실패", err);
+    }
+  };
 
   return (
     <LayoutWrapper>
@@ -338,8 +359,6 @@ const EndDoneButton = styled(EndButton)`
   color: #6b7280;
   cursor: default;
 `;
-
-
 
 const ModalButton = styled.button`
   flex: 1;
