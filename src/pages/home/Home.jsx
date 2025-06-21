@@ -27,9 +27,6 @@ export default function Home() {
 
       const res = await axios.get(url, {
         params,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
       });
 
       const rawData = Array.isArray(res.data)
