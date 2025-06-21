@@ -54,7 +54,15 @@ export default function MyPage() {
   }, [navigate]);
 
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", backgroundColor: "#fff" }}>
+    <div
+      style={{
+        maxWidth: 480,
+        margin: "0 auto",
+        backgroundColor: "#fff",
+        paddingTop: 56, // ✅ TopNav 공간 확보
+        paddingBottom: 80, // ✅ BottomNav 공간 확보
+      }}
+    >
       {/* 프로필 */}
       <div
         style={{
@@ -198,7 +206,6 @@ export default function MyPage() {
         >
           Logout
         </button>
-        <BottomNav />
       </div>
     </div>
   );

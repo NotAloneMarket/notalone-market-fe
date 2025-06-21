@@ -9,6 +9,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [productList, setProductList] = useState([]);
+  const [keyword, setKeyword] = useState("");
 
   const categories = [
     "전체",
@@ -20,29 +21,35 @@ export default function Home() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/posts", {
+      let url = "/posts";
+
+      if (keyword.trim() !== "") {
+        url += `?keyword=${encodeURIComponent(keyword)}`;
+      }
+
+      const res = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      console.log("posts 응답 데이터:", res.data);
-
-      const data = res.data ?? [];
+      const rawData = keyword.trim() !== "" ? res.data.postList : res.data;
 
       const filtered =
         selectedCategory === "전체"
-          ? data
-          : data.filter((p) => p.categoryName === selectedCategory);
+          ? rawData
+          : rawData.filter((p) => p.categoryName === selectedCategory);
 
       const transformed = filtered.map((item) => ({
         id: item.id,
         title: item.title,
-        price: `${Math.floor(item.totalAmount / item.totalQuantity)} 원`,
+        price: item.totalAmount
+          ? `${Math.floor(item.totalAmount / item.totalQuantity)} 원`
+          : "가격 정보 없음",
         chatCount: 0,
         image: item.imageUrl?.startsWith("/uploads")
           ? `http://localhost:8080${item.imageUrl}`
-          : sampleImg, // 로컬 이미지 대체
+          : sampleImg,
       }));
 
       setProductList(transformed);

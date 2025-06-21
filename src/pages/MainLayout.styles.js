@@ -1,7 +1,6 @@
 import styled from "styled-components";
 
 export const OuterWrapper = styled.div`
-  width: 100vw;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -22,7 +21,7 @@ export const MainContent = styled.main`
   flex-grow: 1;
   overflow-y: auto;
   justify-content: center;
-  margin-top: ${({ $searchOpen }) => ($searchOpen ? "0px" : "56px")};
+  margin-top: 56px;
   transition: margin-top 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 `;
 
