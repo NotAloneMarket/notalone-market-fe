@@ -123,3 +123,20 @@ export const FloatingButton = styled.button`
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
 `;
+
+export const SearchBox = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+export const SearchInput = styled.input`
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  background-color: white;
+`;

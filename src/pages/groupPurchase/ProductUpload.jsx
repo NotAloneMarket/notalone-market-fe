@@ -48,10 +48,13 @@ function ProductUploadPage({ onUpload }) {
       alert("상품명, 총 금액, 수량은 필수 항목입니다.");
       return;
     }
+
     const categoryMap = {
       식품: 1,
-      생활용품: 2,
-      기타: 3,
+      전자제품: 2,
+      생활용품: 3,
+      의류: 4,
+      기타: 5,
     };
 
     const formData = new FormData();
@@ -66,7 +69,7 @@ function ProductUploadPage({ onUpload }) {
     );
     formData.append("participantLimit", form.maxParticipants);
     formData.append("productUrl", form.productLink);
-    formData.append("categoryId", categoryMap[form.category] || 3); // 아래 categoryMap 참고
+    formData.append("categoryId", categoryMap[form.category] || 3);
 
     if (imageFile) {
       formData.append("image", imageFile);
@@ -75,7 +78,18 @@ function ProductUploadPage({ onUpload }) {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:8080/posts/write", {
+      // ✅ 1. 사용자 정보 조회 (userId 확보)
+      const userRes = await fetch("http://localhost:8080/user/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const userData = await userRes.json();
+      const userId = userData.userId;
+      console.log("✅ userId:", userId); // 확인용 로그
+
+      // ✅ 2. 게시글 업로드
+      const postRes = await fetch("http://localhost:8080/posts/write", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,15 +97,41 @@ function ProductUploadPage({ onUpload }) {
         body: formData,
       });
 
-      if (!res.ok) {
-        throw new Error("업로드 실패");
-      }
+      if (!postRes.ok) throw new Error("게시글 업로드 실패");
 
-      alert("공동구매 게시글이 등록되었습니다.");
-      navigate("/Home");
+      // const postData = await postRes.json();
+      // const postId = postData.postId;
+
+      console.log("📦 postRes:", postRes);
+      const text = await postRes.text();
+      console.log("📄 raw text:", text); // 실제로 어떤 문자열이 왔는지 확인
+      const postData = JSON.parse(text); // 수동 파싱
+      const postId = postData.postId;
+
+      console.log("✅ postId:", postId); // 확인용 로그
+      // ✅ 3. 채팅방 생성
+      const chatRes = await fetch("http://localhost:8080/chatrooms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          postId,
+          hostId: userId,
+        }),
+      });
+
+      if (!chatRes.ok) throw new Error("채팅방 생성 실패");
+
+      const chatRoomId = await chatRes.json();
+      console.log("✅ chatRoomId:", chatRoomId);
+      navigate(`/ChatRoom/${chatRoomId.roomId}`); // 숫자만 추출해서 이동
+
+      alert("게시글 등록 및 채팅방 생성 완료");
     } catch (err) {
-      console.error("업로드 실패", err);
-      alert("등록 중 오류가 발생했습니다.");
+      console.error("업로드 중 오류", err);
+      alert("오류가 발생했습니다.");
     }
   };
 
@@ -121,7 +161,9 @@ function ProductUploadPage({ onUpload }) {
       >
         <option value="">선택하세요</option>
         <option value="식품">식품</option>
+        <option value="전자제품">전자제품</option>
         <option value="생활용품">생활용품</option>
+        <option value="의류">의류</option>
         <option value="기타">기타</option>
       </Select>
 
