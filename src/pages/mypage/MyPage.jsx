@@ -17,6 +17,11 @@ export default function MyPage() {
   const [profileImageUrl, setProfileImageUrl] = useState("");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -178,7 +183,11 @@ export default function MyPage() {
             fontSize: 15,
             cursor: "pointer",
           }}
-          onClick={() => alert("로그아웃")}
+          onClick={() => {
+            localStorage.removeItem("token"); // 토큰 삭제
+            alert("로그아웃 되었습니다."); // 알림창 표시
+            navigate("/login"); // 로그인 페이지로 이동
+          }}
         >
           Logout
         </button>

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./GroupPurchaseDetailPage.css";
 import sampleImg from "../../assets/sample.png";
 import { FaChevronLeft } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "../../api/axiosInstance";
+import { FaExternalLinkAlt } from "react-icons/fa";
 
 export default function GroupPurchaseDetailPage() {
   const { id } = useParams();
@@ -40,6 +41,7 @@ export default function GroupPurchaseDetailPage() {
     participantLimit,
     categoryName,
     imageUrl,
+    productUrl,
   } = post;
 
   const availableQuantity = totalQuantity - myQuantity;
@@ -83,14 +85,51 @@ export default function GroupPurchaseDetailPage() {
             <span>총 금액</span>
             <span>{totalAmount.toLocaleString()} 원</span>
           </div>
+
           <div className="row">
             <span>총 수량</span>
             <span>{totalQuantity} 개</span>
           </div>
+
           <div className="row">
             <span>구매 가능 수량</span>
             <span>{availableQuantity} 개</span>
           </div>
+
+          {/* 상품 링크 추가 */}
+
+          {productUrl && (
+            <div
+              className="row"
+              style={{
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: 6,
+              }}
+            >
+              <span>상품 링크</span>
+              <a
+                href={productUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 12px",
+                  backgroundColor: "#3c82f6",
+                  color: "#fff",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                <FaExternalLinkAlt size={14} />
+                상품 페이지 이동
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
