@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaPen } from "react-icons/fa";
+import { FaPen, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import sampleImg from "../../assets/sample.png";
 import * as S from "./Home.styles";
@@ -11,36 +11,32 @@ export default function Home() {
   const [productList, setProductList] = useState([]);
   const [keyword, setKeyword] = useState("");
 
-  const categories = [
-    "전체",
-    "식품",
-    "도서/반려/티켓",
-    "가구/인테리어",
-    "잡화",
-  ];
+  const categories = ["전체", "식품", "전자제품", "생활용품", "의류", "기타"];
 
   const fetchProducts = async () => {
     try {
       let url = "/posts";
+      const params = {};
 
       if (keyword.trim() !== "") {
-        url += `?keyword=${encodeURIComponent(keyword)}`;
+        params.keyword = keyword.trim();
+      }
+      if (selectedCategory !== "전체") {
+        params.category = selectedCategory;
       }
 
       const res = await axios.get(url, {
+        params,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
-      const rawData = keyword.trim() !== "" ? res.data.postList : res.data;
+      const rawData = Array.isArray(res.data)
+        ? res.data
+        : res.data.postList ?? [];
 
-      const filtered =
-        selectedCategory === "전체"
-          ? rawData
-          : rawData.filter((p) => p.categoryName === selectedCategory);
-
-      const transformed = filtered.map((item) => ({
+      const transformed = rawData.map((item) => ({
         id: item.id,
         title: item.title,
         price: item.totalAmount
@@ -63,6 +59,12 @@ export default function Home() {
     fetchProducts();
   }, [selectedCategory]);
 
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      fetchProducts();
+    }
+  };
+
   const renderChatDots = (count) => {
     const dots = Array(Math.min(count, 3)).fill("●");
     return (
@@ -77,6 +79,19 @@ export default function Home() {
 
   return (
     <S.Container>
+      {/* 검색창 */}
+      <S.SearchBox>
+        <FaSearch style={{ marginRight: 8, color: "#888" }} />
+        <S.SearchInput
+          type="text"
+          placeholder="검색어를 입력하세요"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onKeyDown={handleSearchKeyDown}
+        />
+      </S.SearchBox>
+
+      {/* 카테고리 */}
       <S.CategoryBar>
         {categories.map((cat) => (
           <S.CategoryButton
@@ -89,6 +104,7 @@ export default function Home() {
         ))}
       </S.CategoryBar>
 
+      {/* 상품 리스트 */}
       <S.ProductList>
         {productList.map((product) => (
           <S.ProductItem
