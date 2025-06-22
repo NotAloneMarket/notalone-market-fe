@@ -25,7 +25,7 @@ export default function Home() {
         params.category = selectedCategory;
       }
 
-      const res = await axios.get(url, {
+      const res = await axios.get("http://localhost:8080/posts", {
         params,
       });
 
