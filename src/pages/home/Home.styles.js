@@ -140,3 +140,10 @@ export const SearchInput = styled.input`
   font-size: 0.875rem;
   background-color: white;
 `;
+
+export const NoResultMessage = styled.div`
+  text-align: center;
+  padding: 40px 0;
+  font-size: 16px;
+  color: #777;
+`;
