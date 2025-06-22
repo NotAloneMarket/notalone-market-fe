@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import sampleImg from "../../assets/sample.png";
 
 function ProductUploadPage({ onUpload }) {
   const navigate = useNavigate();
@@ -83,7 +82,7 @@ function ProductUploadPage({ onUpload }) {
     try {
       const token = localStorage.getItem("token");
 
-      // ✅ 사용자 정보 조회
+      // 사용자 정보 조회
       const userRes = await fetch("http://localhost:8080/user/me", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -95,9 +94,9 @@ function ProductUploadPage({ onUpload }) {
 
       const userData = await userRes.json();
       const userId = userData.userId;
-      console.log("✅ userId:", userId);
+      console.log("userId:", userId);
 
-      // ✅ 게시글 업로드
+      // 게시글 업로드
       const postRes = await fetch("http://localhost:8080/posts/write", {
         method: "POST",
         headers: {
@@ -109,16 +108,16 @@ function ProductUploadPage({ onUpload }) {
 
       if (!postRes.ok) {
         const errorText = await postRes.text();
-        console.error("🚫 postRes error:", errorText);
+        console.error("postRes error:", errorText);
         throw new Error("게시글 업로드 실패");
       }
 
       const text = await postRes.text();
       const postData = JSON.parse(text);
       const postId = postData.postId;
-      console.log("✅ postId:", postId);
+      console.log("postId:", postId);
 
-      // ✅ 채팅방 생성
+      // 채팅방 생성
       const chatRes = await fetch("http://localhost:8080/chatrooms", {
         method: "POST",
         headers: {
@@ -134,12 +133,12 @@ function ProductUploadPage({ onUpload }) {
       if (!chatRes.ok) throw new Error("채팅방 생성 실패");
 
       const chatRoom = await chatRes.json();
-      console.log("✅ chatRoomId:", chatRoom.roomId);
+      console.log("chatRoomId:", chatRoom.roomId);
 
       alert("게시글 등록 및 채팅방 생성 완료");
       navigate(`/ChatRoom/${chatRoom.roomId}`);
     } catch (err) {
-      console.error("❌ 업로드 중 오류:", err);
+      console.error("업로드 중 오류:", err);
       alert("업로드 실패: " + err.message);
     }
   };

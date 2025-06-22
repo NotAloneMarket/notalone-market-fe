@@ -48,7 +48,7 @@ export default function Home() {
           ? `http://localhost:8080${item.imageUrl}`
           : item.imageUrl || sampleImg,
       }));
-      console.log("✅ 받은 상품 리스트:", transformed);
+      console.log("받은 상품 리스트:", transformed);
       setProductList(transformed);
     } catch (err) {
       console.error("상품 목록 불러오기 실패", err);
@@ -56,22 +56,21 @@ export default function Home() {
     }
   };
 
-  // ✅ 카테고리 변경 시 검색어 포함하여 자동 검색
+  // 카테고리 변경 시 검색어 포함하여 자동 검색
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory]);
 
-  // ✅ 검색 키보드 입력
   const handleSearchKeyDown = (e) => {
     if (e.key === "Enter") fetchProducts();
   };
 
-  // ✅ 검색 버튼 클릭
+  // 검색 버
   const handleSearchClick = () => {
     fetchProducts();
   };
 
-  // ✅ 채팅 점수 시각화
+  // 채팅방 인원수
   const renderChatDots = (count) => {
     const dots = Array(Math.min(count, 3)).fill("●");
     return (
@@ -86,7 +85,6 @@ export default function Home() {
 
   return (
     <S.Container>
-      {/* 🔍 검색창 */}
       <S.SearchBox>
         <FaSearch
           style={{ marginRight: 8, color: "#888", cursor: "pointer" }}
@@ -101,7 +99,6 @@ export default function Home() {
         />
       </S.SearchBox>
 
-      {/* 🗂 카테고리 바 */}
       <S.CategoryBar>
         {categories.map((cat) => (
           <S.CategoryButton
@@ -114,7 +111,6 @@ export default function Home() {
         ))}
       </S.CategoryBar>
 
-      {/* 🛍 상품 리스트 */}
       <S.ProductList>
         {productList.length === 0 ? (
           <S.NoResultMessage>
@@ -144,7 +140,6 @@ export default function Home() {
         )}
       </S.ProductList>
 
-      {/* ➕ 등록 버튼 */}
       <S.FloatingButton onClick={() => navigate("/ProductUpload")}>
         <FaPen />
       </S.FloatingButton>

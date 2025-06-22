@@ -30,7 +30,7 @@ export default function GroupPurchaseDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!post) return; // 내부에서 조건 걸기
+    if (!post) return;
     const fetchChatRoomParticipantCount = async () => {
       try {
         const res1 = await axios.get(
@@ -62,10 +62,9 @@ export default function GroupPurchaseDetailPage() {
     fetchChatRoomParticipantCount();
   }, [post, id]);
 
-  // ✅ 여기에서 post.imageUrl이 잘 들어오는지 로그로 확인!
   useEffect(() => {
     if (post) {
-      console.log("🔥 post.imageUrl:", post.imageUrl);
+      console.log("post.imageUrl:", post.imageUrl);
     }
   }, [post]);
 
@@ -198,7 +197,7 @@ export default function GroupPurchaseDetailPage() {
               );
 
               const joinedRoomId = res.data.roomId;
-              console.log("✅ 채팅방 참여 응답:", res.data);
+              console.log("채팅방 참여 응답:", res.data);
 
               navigate(`/ChatRoom/${joinedRoomId}`);
             } catch (err) {

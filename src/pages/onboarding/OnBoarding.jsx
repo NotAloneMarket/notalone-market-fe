@@ -10,7 +10,7 @@ export default function OnBoarding() {
       navigate("/Login");
     }, 3000); // 3초 뒤 이동
 
-    return () => clearTimeout(timer); // 컴포넌트 언마운트 시 타이머 정리
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   const styles = {
