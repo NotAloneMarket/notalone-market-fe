@@ -32,20 +32,24 @@ export default function Orders() {
         },
       });
 
-      const transformed = res.data.buyHistory.map((item) => ({
-        id: item.postId,
-        date:
-          new Date(item.completedAt).toLocaleDateString("ko-KR", {
-            month: "2-digit",
-            day: "2-digit",
-          }) + " 거래 완료",
-        title: item.title,
-        quantity: item.quantity,
-        price: item.price.toLocaleString() + " 원",
-        image: item.imageUrl?.startsWith("/uploads")
-          ? "http://localhost:8080" + item.imageUrl
-          : item.imageUrl || sampleImg,
-      }));
+      const transformed = res.data.buyHistory.map((item) => {
+        console.log("🧾 이미지 URL 확인:", item.imageUrl);
+
+        return {
+          id: item.postId,
+          date:
+            new Date(item.completedAt).toLocaleDateString("ko-KR", {
+              month: "2-digit",
+              day: "2-digit",
+            }) + " 거래 완료",
+          title: item.title,
+          quantity: item.quantity,
+          price: item.price.toLocaleString() + " 원",
+          image: item.imageUrl?.startsWith("/uploads")
+            ? `http://localhost:8080${item.imageUrl}`
+            : item.imageUrl || sampleImg,
+        };
+      });
 
       setOrders(transformed);
     } catch (err) {
