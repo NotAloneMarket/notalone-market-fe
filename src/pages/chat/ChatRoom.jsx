@@ -121,11 +121,13 @@ export default function ChatRoom() {
         }
       );
 
-      // 4. 구매 내역 생성
-      await axios.post(`/buyHistory/create`, null, {
+      // 4. 구매 내역 생성 (참여자 전체 대상으로 생성)
+      const historyRes = await axios.post(`/buyHistory/create`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("✅ 구매 내역 생성 응답:", historyRes.data); // ← 확인 로그
 
+      // 5. UI 상태 업데이트
       setIsDealEnded(true);
       setShowModal(false);
       alert("거래가 완료되었습니다.");
