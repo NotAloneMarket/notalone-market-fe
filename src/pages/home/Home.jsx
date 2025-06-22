@@ -9,28 +9,29 @@ export default function Home() {
   const navigate = useNavigate();
 
   const [selectedCategory, setSelectedCategory] = useState("전체");
-
   const [productList, setProductList] = useState([]);
-
   const [keyword, setKeyword] = useState("");
 
   const categories = ["전체", "식품", "전자제품", "생활용품", "의류", "기타"];
 
-  // 상품 리스트를 서버에서 불러오기
+  const categoryMap = {
+    전체: null,
+    식품: 1,
+    전자제품: 2,
+    생활용품: 3,
+    의류: 4,
+    기타: 5,
+  };
+
   const fetchProducts = async () => {
     try {
       const params = {};
+      if (keyword.trim()) params.keyword = keyword.trim();
 
-      if (keyword.trim() !== "") {
-        params.keyword = keyword.trim();
-      }
-      if (selectedCategory !== "전체") {
-        params.category = selectedCategory;
-      }
+      const categoryId = categoryMap[selectedCategory];
+      if (categoryId) params.categoryId = categoryId;
 
-      const res = await axios.get("http://localhost:8080/posts", {
-        params,
-      });
+      const res = await axios.get("/posts", { params });
 
       const rawData = Array.isArray(res.data)
         ? res.data
@@ -47,7 +48,7 @@ export default function Home() {
           ? `http://localhost:8080${item.imageUrl}`
           : item.imageUrl || sampleImg,
       }));
-
+      console.log("받은 상품 리스트:", transformed);
       setProductList(transformed);
     } catch (err) {
       console.error("상품 목록 불러오기 실패", err);
@@ -55,6 +56,7 @@ export default function Home() {
     }
   };
 
+  // 카테고리 변경 시 검색어 포함하여 자동 검색
   useEffect(() => {
     fetchProducts();
   }, [selectedCategory]);
@@ -63,11 +65,12 @@ export default function Home() {
     if (e.key === "Enter") fetchProducts();
   };
 
+  // 검색 버
   const handleSearchClick = () => {
     fetchProducts();
   };
 
-  // 채팅 개수에 따라 점(...) 표시 렌더링
+  // 채팅방 인원수
   const renderChatDots = (count) => {
     const dots = Array(Math.min(count, 3)).fill("●");
     return (
@@ -110,7 +113,13 @@ export default function Home() {
 
       <S.ProductList>
         {productList.length === 0 ? (
-          <S.NoResultMessage>검색 결과가 없습니다.</S.NoResultMessage>
+          <S.NoResultMessage>
+            {keyword.trim()
+              ? selectedCategory !== "전체"
+                ? `"${selectedCategory}"에서 "${keyword}" 검색 결과가 없습니다.`
+                : `"${keyword}"에 대한 검색 결과가 없습니다.`
+              : `"${selectedCategory}"에 등록된 상품이 없습니다.`}
+          </S.NoResultMessage>
         ) : (
           productList.map((product) => (
             <S.ProductItem
