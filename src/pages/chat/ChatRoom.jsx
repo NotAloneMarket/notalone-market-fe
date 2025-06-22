@@ -51,7 +51,7 @@ export default function ChatRoom() {
       setParticipantCount(res.data.participantCount);
     });
 
-    const socket = new SockJS("http://localhost:8080/ws");
+    const socket = new SockJS(`http://localhost:8080/ws?token=${token}`);
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
