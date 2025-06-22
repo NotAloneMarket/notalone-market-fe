@@ -24,10 +24,18 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       const params = {};
-      if (keyword.trim() !== "") params.keyword = keyword.trim();
-      if (selectedCategory !== "전체") params.category = selectedCategory;
 
-      const res = await axios.get("/posts", { params });
+      if (keyword.trim() !== "") {
+        params.keyword = keyword.trim();
+      }
+      if (selectedCategory !== "전체") {
+        params.category = selectedCategory;
+      }
+
+      const res = await axios.get("http://localhost:8080/posts", {
+        params,
+      });
+
 
       // 응답 형식 유연하게 처리 (배열 또는 객체 내부 postList)
       const rawData = Array.isArray(res.data)
