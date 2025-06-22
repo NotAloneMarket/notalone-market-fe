@@ -72,11 +72,10 @@ function ProductUploadPage({ onUpload }) {
     formData.append("totalAmount", String(Number(form.totalAmount)));
     formData.append("totalQuantity", String(Number(form.totalQuantity)));
     formData.append("myQuantity", String(Number(form.userQuantity)));
-    formData.append("pricePerItem", String(pricePerPerson)); // 계산된 값
+    formData.append("pricePerItem", String(pricePerPerson));
     formData.append("participantLimit", String(Number(form.maxParticipants)));
     formData.append("productUrl", form.productLink);
-    formData.append("categoryId", String(categoryMap[form.category] || 3)); // Long 타입으로 보낼 것
-
+    formData.append("categoryId", String(categoryMap[form.category] || 3));
     if (imageFile) {
       formData.append("image", imageFile);
     }
