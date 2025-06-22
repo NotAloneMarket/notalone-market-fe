@@ -27,7 +27,12 @@ export default function MyPage() {
         });
 
         setNickname(res.data.nickname);
-        setProfileImageUrl("http://localhost:8080" + res.data.profileImageUrl);
+        const rawUrl = res.data.profileImageUrl;
+        setProfileImageUrl(
+          rawUrl?.startsWith("/uploads")
+            ? "http://localhost:8080" + rawUrl
+            : rawUrl || ""
+        );
       } catch (err) {
         console.error("❌ 사용자 정보를 불러오지 못했습니다", err);
       }
@@ -149,15 +154,22 @@ export default function MyPage() {
               cursor="pointer"
             >
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div
+                <img
+                  src={
+                    post.imageUrl?.startsWith("/uploads")
+                      ? "http://localhost:8080" + post.imageUrl
+                      : post.imageUrl || sampleImg
+                  }
+                  alt="post thumbnail"
                   style={{
                     width: 36,
                     height: 36,
                     borderRadius: "50%",
-                    backgroundColor: "#f0f0f0",
+                    objectFit: "cover",
                     marginRight: 12,
                   }}
-                ></div>
+                />
+
                 <div>
                   <div style={{ fontWeight: "bold", fontSize: 14 }}>
                     {post.title}
