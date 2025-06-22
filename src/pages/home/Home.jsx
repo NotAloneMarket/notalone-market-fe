@@ -42,7 +42,7 @@ export default function Home() {
         chatCount: 0,
         image: item.imageUrl?.startsWith("/uploads")
           ? `http://localhost:8080${item.imageUrl}`
-          : sampleImg,
+          : item.imageUrl || sampleImg,
       }));
 
       setProductList(transformed);

@@ -100,9 +100,7 @@ export default function GroupPurchaseDetailPage() {
         src={
           imageUrl?.startsWith("/uploads/")
             ? `http://localhost:8080${imageUrl}`
-            : imageUrl
-            ? import.meta.env.BASE_URL + imageUrl
-            : sampleImg
+            : imageUrl || sampleImg
         }
         alt={title}
         className="product-image"
