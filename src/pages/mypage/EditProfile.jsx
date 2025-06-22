@@ -35,23 +35,46 @@ export default function EditProfile() {
     fetchUserInfo();
   }, []);
 
+  const uploadToCloudinary = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "my_unsigned_preset"); // Cloudinary 설정에서 만든 preset
+    data.append("cloud_name", "dqpkafrv2"); // 본인의 cloud name
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dqpkafrv2/image/upload",
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+
+    const result = await res.json();
+    return result.secure_url; // 이걸 서버에 보냄
+  };
+
   const handleSubmit = async () => {
     try {
-      const formData = new FormData();
-      formData.append("nickname", nickname);
-      formData.append("phoneNum", phoneNum);
+      let imageUrl = previewUrl;
+
+      // 이미지가 새로 선택되었으면 Cloudinary에 업로드
       if (profileImage) {
-        formData.append("profileImage", profileImage);
+        imageUrl = await uploadToCloudinary(profileImage);
       }
 
+      // 서버에 수정 요청 보내기 (Cloudinary URL 포함)
       const token = localStorage.getItem("token");
 
-      const res = await axios.put(
-        "/user/profile", // 프록시 경로
-        formData,
+      await axios.put(
+        "/user/profile",
+        {
+          nickname,
+          phoneNum,
+          profileImageUrl: imageUrl,
+        },
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -60,7 +83,7 @@ export default function EditProfile() {
       alert("프로필이 수정되었습니다.");
       navigate("/mypage");
     } catch (err) {
-      console.error(err);
+      console.error("❌ 수정 실패:", err);
       alert("수정 실패");
     }
   };
