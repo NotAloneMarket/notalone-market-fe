@@ -7,7 +7,7 @@ import {
   FaLock,
   FaUniversity,
 } from "react-icons/fa";
-import axios from "../../api/axiosInstance"; // axios 인스턴스 생성해 둔 파일 (interceptor 포함되면 더 좋아요)
+import axios from "../../api/axiosInstance";
 
 export default function Join() {
   const navigate = useNavigate();
@@ -49,7 +49,10 @@ export default function Join() {
         accountNumber: form.account,
       };
 
-      const res = await axios.post("http://localhost:8080/user/register", payload);
+      const res = await axios.post(
+        "http://localhost:8080/user/register",
+        payload
+      );
 
       if (res.status === 201) {
         alert("회원가입이 완료되었습니다.");
@@ -113,7 +116,14 @@ export default function Join() {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h1 style={{ fontSize: "24px", fontWeight: "bold", color: "#5a6ef5", marginBottom: "8px" }}>
+          <h1
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              color: "#5a6ef5",
+              marginBottom: "8px",
+            }}
+          >
             나혼자 안산다
           </h1>
           <p style={{ fontSize: "13px", color: "#888" }}>
@@ -121,7 +131,14 @@ export default function Join() {
           </p>
         </div>
 
-        <div style={{ textAlign: "center", fontWeight: "bold", fontSize: "16px", marginBottom: "24px" }}>
+        <div
+          style={{
+            textAlign: "center",
+            fontWeight: "bold",
+            fontSize: "16px",
+            marginBottom: "24px",
+          }}
+        >
           회원가입
         </div>
 
@@ -129,7 +146,12 @@ export default function Join() {
         {renderInput(<FaIdBadge />, "아이디", "username")}
         {renderInput(<FaPhone />, "전화번호", "phone")}
         {renderInput(<FaLock />, "비밀번호", "password", "password")}
-        {renderInput(<FaLock />, "비밀번호 확인", "passwordConfirm", "password")}
+        {renderInput(
+          <FaLock />,
+          "비밀번호 확인",
+          "passwordConfirm",
+          "password"
+        )}
         {renderInput(<FaUniversity />, "계좌번호", "account")}
 
         <label

@@ -8,7 +8,7 @@ export default function Orders() {
 
   function parseJwt(token) {
     try {
-      const base64Url = token.split(".")[1]; // payload 부분
+      const base64Url = token.split(".")[1];
       const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
       const jsonPayload = decodeURIComponent(
         atob(base64)
@@ -16,7 +16,7 @@ export default function Orders() {
           .map((c) => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
           .join("")
       );
-      return JSON.parse(jsonPayload); // payload 객체 반환
+      return JSON.parse(jsonPayload);
     } catch (e) {
       console.error("JWT 파싱 실패", e);
       return null;
@@ -33,7 +33,7 @@ export default function Orders() {
       });
 
       const transformed = res.data.buyHistory.map((item) => {
-        console.log("🧾 이미지 URL 확인:", item.imageUrl);
+        console.log("이미지 URL 확인:", item.imageUrl);
 
         return {
           id: item.postId,
@@ -60,7 +60,7 @@ export default function Orders() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const payload = parseJwt(token);
-    console.log("로그인한 사용자 정보:", payload); // userId, loginId 등 확인
+    console.log("로그인한 사용자 정보:", payload);
 
     fetchOrders();
   }, []);

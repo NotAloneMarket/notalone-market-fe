@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle, FaPen, FaChevronRight } from "react-icons/fa";
 import axios from "@/api/axiosInstance";
-import BottomNav from "../../components/BottomNav";
 
 export default function MyPage() {
   const navigate = useNavigate();
@@ -34,7 +33,7 @@ export default function MyPage() {
             : rawUrl || ""
         );
       } catch (err) {
-        console.error("❌ 사용자 정보를 불러오지 못했습니다", err);
+        console.error("사용자 정보를 불러오지 못했습니다", err);
       }
     };
 
@@ -44,13 +43,13 @@ export default function MyPage() {
         const res = await axios.get("/posts/my", {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Cache-Control": "no-cache", // 캐시 방지 헤더 추가
+            "Cache-Control": "no-cache",
           },
         });
         setMyPosts(res.data || []);
-        console.log("✅ 내가 쓴 글 응답:", res.data);
+        console.log("내가 쓴 글 응답:", res.data);
       } catch (err) {
-        console.error("❌ 내가 쓴 글을 불러오지 못했습니다", err);
+        console.error("내가 쓴 글을 불러오지 못했습니다", err);
       }
     };
 
@@ -64,11 +63,10 @@ export default function MyPage() {
         maxWidth: 480,
         margin: "0 auto",
         backgroundColor: "#fff",
-        paddingTop: 56, // ✅ TopNav 공간 확보
-        paddingBottom: 80, // ✅ BottomNav 공간 확보
+        paddingTop: 56,
+        paddingBottom: 80,
       }}
     >
-      {/* 프로필 */}
       <div
         style={{
           textAlign: "center",
@@ -130,7 +128,6 @@ export default function MyPage() {
         <div style={{ marginTop: 8, fontWeight: "bold" }}>{nickname}</div>
       </div>
 
-      {/* 내가 쓴 글 */}
       <div style={{ padding: "20px" }}>
         <h3 style={{ fontSize: 14, fontWeight: "bold", marginBottom: 12 }}>
           내가 쓴 글
@@ -189,7 +186,6 @@ export default function MyPage() {
         )}
       </div>
 
-      {/* 로그아웃 버튼 */}
       <div
         style={{
           padding: "20px",
@@ -211,9 +207,9 @@ export default function MyPage() {
             cursor: "pointer",
           }}
           onClick={() => {
-            localStorage.removeItem("token"); // 토큰 삭제
-            alert("로그아웃 되었습니다."); // 알림창 표시
-            navigate("/login"); // 로그인 페이지로 이동
+            localStorage.removeItem("token");
+            alert("로그아웃 되었습니다.");
+            navigate("/login");
           }}
         >
           Logout

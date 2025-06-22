@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { FaChevronLeft, FaPen } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
 import * as S from "./SearchResult.styles";
 import sampleImg from "../../assets/sample.png";
 
 export default function SearchResult() {
-  const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const keyword = queryParams.get("q");
@@ -16,7 +14,6 @@ export default function SearchResult() {
   const fetchProducts = async (keyword) => {
     setIsLoading(true);
     try {
-      // const res = await axios.get(`/api/products/search?q=${keyword}`);
       const dummyData = Array(10).fill({
         id: crypto.randomUUID(),
         title: "단백질 쉐이크 18개입",
@@ -55,7 +52,6 @@ export default function SearchResult() {
         <span className="highlight">"{keyword}"</span>에 대한 검색 결과입니다.
       </S.KeywordSummary>
 
-      {/* ✅ 로딩 처리 */}
       {isLoading ? (
         <S.ProductList>불러오는 중...</S.ProductList>
       ) : productList.length === 0 ? (

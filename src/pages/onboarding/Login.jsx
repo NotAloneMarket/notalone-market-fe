@@ -18,13 +18,11 @@ export default function Login() {
 
       const { token, userId } = response.data;
 
-      // 토큰을 localStorage 또는 sessionStorage에 저장
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId);
 
       console.log("token: ", token);
       console.log("userId: ", userId);
-      // 홈 화면으로 이동
       navigate("/Home");
     } catch (err) {
       console.error(err);

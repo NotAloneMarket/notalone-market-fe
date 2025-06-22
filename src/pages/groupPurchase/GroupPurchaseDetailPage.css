@@ -87,7 +87,7 @@
   margin: 8px 0;
 }
 
-/* ✅ 하단 고정 바 (가운데 정렬 + 최대 너비 고정) */
+/* 하단 고정 바  */
 .bottom-bar {
   position: fixed;
   bottom: 0;

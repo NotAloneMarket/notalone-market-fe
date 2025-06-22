@@ -116,7 +116,7 @@ export default function ChatRoom() {
       const historyRes = await axios.post(`/buyHistory/create`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("✅ 구매 내역 생성 응답:", historyRes.data);
+      console.log("구매 내역 생성 응답:", historyRes.data);
 
       setIsDealEnded(true);
       setShowModal(false);

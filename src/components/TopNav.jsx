@@ -1,10 +1,9 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaChevronLeft } from "react-icons/fa";
 import styled from "styled-components";
 
 export default function TopNav() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   return (
     <Wrapper>
