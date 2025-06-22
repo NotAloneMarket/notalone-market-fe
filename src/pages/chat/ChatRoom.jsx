@@ -3,13 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaChevronLeft, FaArrowUp } from "react-icons/fa";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import axios from "../../api/axiosInstance"; // axiosInstance로 변경
+import axios from "../../api/axiosInstance";
 import styled, { css } from "styled-components";
 
 export default function ChatRoom() {
   const { id: chatId } = useParams();
   const navigate = useNavigate();
-
   const [isOwner, setIsOwner] = useState(false);
   const [isDealEnded, setIsDealEnded] = useState(false);
   const [postTitle, setPostTitle] = useState("");
@@ -21,10 +20,14 @@ export default function ChatRoom() {
   const [stompClient, setStompClient] = useState(null);
 
   const userId = Number(localStorage.getItem("userId"));
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // 메시지 목록
-    axios.get(`/chatrooms/${chatId}/messages`).then((res) => {
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+
+    axios.get(`/chatrooms/${chatId}/messages`, config).then((res) => {
       const fetchedMessages = res.data.map((msg) => ({
         senderId: msg.senderId,
         sender: msg.sender,
@@ -33,25 +36,21 @@ export default function ChatRoom() {
       setMessages(fetchedMessages);
     });
 
-    // 게시글 정보
-    axios.get(`/posts/from-chatroom/${chatId}`).then((res) => {
+    axios.get(`/posts/from-chatroom/${chatId}`, config).then((res) => {
       const post = res.data;
       setPostTitle(post.title);
       setParticipantLimit(post.participantLimit);
       setIsOwner(post.writerId === userId);
     });
 
-    // 거래 완료 여부
-    axios.get(`/chatrooms/${chatId}`).then((res) => {
+    axios.get(`/chatrooms/${chatId}`, config).then((res) => {
       setIsDealEnded(res.data.isCompleted === "Y");
     });
 
-    // 현재 참여 인원
-    axios.get(`/chatrooms/${chatId}/count`).then((res) => {
+    axios.get(`/chatrooms/${chatId}/count`, config).then((res) => {
       setParticipantCount(res.data.participantCount);
     });
 
-    // WebSocket 연결
     const socket = new SockJS("http://localhost:8080/ws");
     const client = new Client({
       webSocketFactory: () => socket,
@@ -75,7 +74,7 @@ export default function ChatRoom() {
     setStompClient(client);
 
     return () => client.deactivate();
-  }, [chatId, userId]);
+  }, [chatId, token, userId]);
 
   const handleSend = () => {
     if (!input.trim() || !stompClient) return;
@@ -97,21 +96,28 @@ export default function ChatRoom() {
 
   const handleDealComplete = async () => {
     try {
-      // 1. postId 얻기
-      const postRes = await axios.get(`/posts/from-chatroom/${chatId}`);
+      const postRes = await axios.get(`/posts/from-chatroom/${chatId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const postId = postRes.data.id;
 
-      // 2. 게시글 상태 완료 처리
-      await axios.post(`/posts/${postId}/complete`);
+      await axios.post(`/posts/${postId}/complete`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      // 3. 채팅방 거래 종료
-      await axios.put(`/chatrooms/${chatId}/complete`, {});
+      await axios.put(
+        `/chatrooms/${chatId}/complete`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      // 4. 구매 내역 생성
-      const historyRes = await axios.post(`/buyHistory/create`);
+      const historyRes = await axios.post(`/buyHistory/create`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       console.log("✅ 구매 내역 생성 응답:", historyRes.data);
 
-      // 5. UI 업데이트
       setIsDealEnded(true);
       setShowModal(false);
       alert("거래가 완료되었습니다.");
@@ -133,7 +139,6 @@ export default function ChatRoom() {
               {isOwner ? "개설자" : "참여자"}
             </SubTitle>
           </HeaderInfo>
-
           {!isDealEnded ? (
             <EndButton
               onClick={isOwner ? () => setShowModal(true) : undefined}
@@ -191,6 +196,7 @@ export default function ChatRoom() {
     </LayoutWrapper>
   );
 }
+
 // Styled Components 아래에 계속
 const LayoutWrapper = styled.div`
   width: 100vw;
