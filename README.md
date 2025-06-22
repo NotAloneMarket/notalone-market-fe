@@ -71,7 +71,7 @@
 
 | ID    | PW        |
 |-------|-----------|
-| admin | admin!!   |
+| admin | admin!    |
 
 ---
 
