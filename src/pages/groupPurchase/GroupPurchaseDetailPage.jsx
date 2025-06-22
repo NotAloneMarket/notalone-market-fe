@@ -181,31 +181,28 @@ export default function GroupPurchaseDetailPage() {
           className="chat-btn"
           onClick={async () => {
             try {
-              const userId = localStorage.getItem("userId");
-              if (!userId) {
+              const token = localStorage.getItem("token");
+              if (!token) {
                 alert("로그인이 필요합니다.");
                 return;
               }
 
               const res = await axios.post(
-                "http://localhost:8080/chatrooms",
-                {
-                  postId: Number(id),
-                  hostId: Number(userId),
-                },
+                `http://localhost:8080/chatrooms/post/${id}/join`,
+                {},
                 {
                   headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    Authorization: `Bearer ${token}`,
                   },
                 }
               );
 
-              const newChatRoomId = res.data; // ← POST 응답에서 받은 chatRoomId
-              console.log("✅ ChatRoom 생성 응답:", res.data); // 여기에 id가 있는지 확인
+              const joinedRoomId = res.data.roomId;
+              console.log("✅ 채팅방 참여 응답:", res.data);
 
-              navigate(`/ChatRoom/${newChatRoomId}`);
+              navigate(`/ChatRoom/${joinedRoomId}`);
             } catch (err) {
-              console.error("채팅방 생성 실패", err);
+              console.error("채팅방 참여 실패", err);
               alert("채팅방 참여에 실패했습니다.");
             }
           }}
