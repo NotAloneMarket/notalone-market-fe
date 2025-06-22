@@ -41,11 +41,8 @@ export default function ChatRoom() {
       setPostTitle(post.title);
       setParticipantLimit(post.participantLimit);
       setIsOwner(post.writerId === userId);
-      // 👇 이거는 더 이상 거래 완료 여부 판단에 사용하지 않음
-      // setIsDealEnded(post.completed === "Y");
     });
 
-    // ✅ 채팅방의 거래 완료 여부를 직접 확인해서 반영!
     axios.get(`/chatrooms/${chatId}`, config).then((res) => {
       setIsDealEnded(res.data.isCompleted === "Y");
     });
@@ -99,35 +96,28 @@ export default function ChatRoom() {
 
   const handleDealComplete = async () => {
     try {
-      // 1. postId 얻기
       const postRes = await axios.get(`/posts/from-chatroom/${chatId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const postId = postRes.data.id;
 
-      // 2. 게시글 상태 완료 처리
       await axios.post(`/posts/${postId}/complete`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // 3. 채팅방 거래 종료
       await axios.put(
         `/chatrooms/${chatId}/complete`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      // 4. 구매 내역 생성 (참여자 전체 대상으로 생성)
       const historyRes = await axios.post(`/buyHistory/create`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("✅ 구매 내역 생성 응답:", historyRes.data); // ← 확인 로그
+      console.log("✅ 구매 내역 생성 응답:", historyRes.data);
 
-      // 5. UI 상태 업데이트
       setIsDealEnded(true);
       setShowModal(false);
       alert("거래가 완료되었습니다.");
@@ -149,8 +139,6 @@ export default function ChatRoom() {
               {isOwner ? "개설자" : "참여자"}
             </SubTitle>
           </HeaderInfo>
-
-          {/* 👉 버튼 조건 분기 수정 */}
           {!isDealEnded ? (
             <EndButton
               onClick={isOwner ? () => setShowModal(true) : undefined}
