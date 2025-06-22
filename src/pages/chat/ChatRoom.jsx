@@ -191,3 +191,187 @@ export default function ChatRoom() {
     </LayoutWrapper>
   );
 }
+// Styled Components 아래에 계속
+const LayoutWrapper = styled.div`
+  width: 100vw;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  display: flex;
+  justify-content: center;
+`;
+
+const Wrapper = styled.div`
+  width: 100%;
+  max-width: 390px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+`;
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+const HeaderInfo = styled.div`
+  flex: 1;
+  margin: 0 8px;
+`;
+
+const Title = styled.div`
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+const SubTitle = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+`;
+
+const DealButton = styled.button`
+  font-size: 12px;
+  padding: 6px 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+`;
+
+const DealEndedText = styled.div`
+  font-size: 12px;
+  padding: 6px 12px;
+  color: #6b7280;
+  background-color: #e5e7eb;
+  border-radius: 6px;
+`;
+
+const MessagesArea = styled.div`
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const MessageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: ${({ isMe }) => (isMe ? "flex-end" : "flex-start")};
+`;
+
+const Sender = styled.div`
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+`;
+
+const MessageBubble = styled.div`
+  max-width: 70%;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 20px;
+  ${({ isMe }) =>
+    isMe
+      ? css`
+          background-color: #3b82f6;
+          color: white;
+          border-bottom-right-radius: 0;
+        `
+      : css`
+          background-color: #f3f4f6;
+          color: black;
+          border-bottom-left-radius: 0;
+        `}
+`;
+
+const InputBox = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-top: 1px solid #e5e7eb;
+`;
+
+const ChatInput = styled.input`
+  flex: 1;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-color: #f3f4f6;
+  outline: none;
+`;
+
+const SendButton = styled.button`
+  margin-left: 8px;
+  padding: 8px;
+  border-radius: 9999px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  cursor: pointer;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const EndButton = styled.button`
+  font-size: 12px;
+  padding: 6px 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+`;
+
+const EndDoneButton = styled(EndButton)`
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: default;
+`;
+
+const ModalButton = styled.button`
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: ${({ $cancel }) => ($cancel ? "#e5e7eb" : "#3b82f6")};
+  color: ${({ $cancel }) => ($cancel ? "#111827" : "white")};
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 280px;
+  text-align: center;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+`;
+
+const ModalText = styled.p`
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+`;
