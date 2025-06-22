@@ -62,6 +62,13 @@ export default function GroupPurchaseDetailPage() {
     fetchChatRoomParticipantCount();
   }, [post, id]);
 
+  // ✅ 여기에서 post.imageUrl이 잘 들어오는지 로그로 확인!
+  useEffect(() => {
+    if (post) {
+      console.log("🔥 post.imageUrl:", post.imageUrl);
+    }
+  }, [post]);
+
   if (!post) return <div>불러오는 중...</div>;
 
   const {

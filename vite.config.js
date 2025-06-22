@@ -14,7 +14,7 @@ export default defineConfig({
     },
   },
   define: {
-    global: 'window', // 🔥 핵심 해결 포인트
+    global: "window",
   },
   server: {
     proxy: {
@@ -27,8 +27,8 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
-      '/ws': {
-        target: 'http://localhost:8080',
+      "/ws": {
+        target: "http://localhost:8080",
         changeOrigin: true,
         secure: false,
         ws: true,

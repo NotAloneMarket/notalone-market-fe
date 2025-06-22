@@ -44,8 +44,17 @@ function ProductUploadPage({ onUpload }) {
   };
 
   const handleUpload = async () => {
-    if (!form.productName || !form.totalAmount || !form.totalQuantity) {
-      alert("상품명, 총 금액, 수량은 필수 항목입니다.");
+    if (
+      !form.productName ||
+      !form.totalAmount ||
+      !form.totalQuantity ||
+      !form.userQuantity ||
+      !form.maxParticipants ||
+      !form.productLink ||
+      !form.description ||
+      !form.category
+    ) {
+      alert("모든 필수 항목을 입력해주세요.");
       return;
     }
 
@@ -60,16 +69,13 @@ function ProductUploadPage({ onUpload }) {
     const formData = new FormData();
     formData.append("title", form.productName);
     formData.append("description", form.description);
-    formData.append("totalAmount", form.totalAmount);
-    formData.append("totalQuantity", form.totalQuantity);
-    formData.append("myQuantity", form.userQuantity);
-    formData.append(
-      "pricePerItem",
-      Math.floor(Number(form.totalAmount) / Number(form.totalQuantity))
-    );
-    formData.append("participantLimit", form.maxParticipants);
+    formData.append("totalAmount", String(Number(form.totalAmount)));
+    formData.append("totalQuantity", String(Number(form.totalQuantity)));
+    formData.append("myQuantity", String(Number(form.userQuantity)));
+    formData.append("pricePerItem", String(pricePerPerson)); // 계산된 값
+    formData.append("participantLimit", String(Number(form.maxParticipants)));
     formData.append("productUrl", form.productLink);
-    formData.append("categoryId", categoryMap[form.category] || 3);
+    formData.append("categoryId", String(categoryMap[form.category] || 3)); // Long 타입으로 보낼 것
 
     if (imageFile) {
       formData.append("image", imageFile);
@@ -78,38 +84,42 @@ function ProductUploadPage({ onUpload }) {
     try {
       const token = localStorage.getItem("token");
 
-      // ✅ 1. 사용자 정보 조회 (userId 확보)
+      // ✅ 사용자 정보 조회
       const userRes = await fetch("http://localhost:8080/user/me", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       });
+
+      if (!userRes.ok) throw new Error("사용자 정보 조회 실패");
+
       const userData = await userRes.json();
       const userId = userData.userId;
-      console.log("✅ userId:", userId); // 확인용 로그
+      console.log("✅ userId:", userId);
 
-      // ✅ 2. 게시글 업로드
+      // ✅ 게시글 업로드
       const postRes = await fetch("http://localhost:8080/posts/write", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        credentials: "include",
+        body: formData, // Content-Type 설정 안 함!
       });
 
-      if (!postRes.ok) throw new Error("게시글 업로드 실패");
+      if (!postRes.ok) {
+        const errorText = await postRes.text();
+        console.error("🚫 postRes error:", errorText);
+        throw new Error("게시글 업로드 실패");
+      }
 
-      // const postData = await postRes.json();
-      // const postId = postData.postId;
-
-      console.log("📦 postRes:", postRes);
       const text = await postRes.text();
-      console.log("📄 raw text:", text); // 실제로 어떤 문자열이 왔는지 확인
-      const postData = JSON.parse(text); // 수동 파싱
+      const postData = JSON.parse(text);
       const postId = postData.postId;
+      console.log("✅ postId:", postId);
 
-      console.log("✅ postId:", postId); // 확인용 로그
-      // ✅ 3. 채팅방 생성
+      // ✅ 채팅방 생성
       const chatRes = await fetch("http://localhost:8080/chatrooms", {
         method: "POST",
         headers: {
@@ -124,14 +134,14 @@ function ProductUploadPage({ onUpload }) {
 
       if (!chatRes.ok) throw new Error("채팅방 생성 실패");
 
-      const chatRoomId = await chatRes.json();
-      console.log("✅ chatRoomId:", chatRoomId);
-      navigate(`/ChatRoom/${chatRoomId.roomId}`); // 숫자만 추출해서 이동
+      const chatRoom = await chatRes.json();
+      console.log("✅ chatRoomId:", chatRoom.roomId);
 
       alert("게시글 등록 및 채팅방 생성 완료");
+      navigate(`/ChatRoom/${chatRoom.roomId}`);
     } catch (err) {
-      console.error("업로드 중 오류", err);
-      alert("오류가 발생했습니다.");
+      console.error("❌ 업로드 중 오류:", err);
+      alert("업로드 실패: " + err.message);
     }
   };
 
